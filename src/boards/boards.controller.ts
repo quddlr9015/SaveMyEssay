@@ -1,13 +1,15 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { Board } from './board.entity';
 import { BoardStatus } from './board-status.enum';
 import { CreateBoardDto } from './dto/CreateBoard';
 import { BoardStatusValidationPipe } from './pipes/BoardStatusValidationPipe';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('boards')
+@UseGuards(AuthGuard())
 export class BoardsController {
-    constructor(private boardsService: BoardsService) {};
+    constructor(private boardsService: BoardsService) { };
 
     @Get('/')
     getAllBoards(): Promise<Board[]> {
@@ -35,7 +37,7 @@ export class BoardsController {
     @Patch('/:id/status')
     updateBoardStatus(
         @Param('id', ParseIntPipe) id: number,
-        @Body('status', BoardStatusValidationPipe) status: BoardStatus 
+        @Body('status', BoardStatusValidationPipe) status: BoardStatus
     ): Promise<Board> {
         return this.boardsService.updateBoardStatus(id, status);
     }

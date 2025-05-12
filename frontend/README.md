@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Essay 입력 페이지 구현 요구사항
 
-## Getting Started
+## 개요
+- 위치: `essayGrader/frontend/src/app/essay`
+- 목적: 사용자가 에세이를 입력하고 제출할 수 있는 페이지 구현
+- 주요 기능: 에세이 입력, 시험 유형 선택, 제출 기능
 
-First, run the development server:
+## 컴포넌트 요구사항
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 1. 필수 컴포넌트
+- TextArea: 에세이 입력용 (최소 높이 500px)
+- Select: 시험 유형 선택용 드롭다운
+- Button: 에세이 제출용
+- Counter: 에세이 길이 표시 (선택)
+
+### 2. 시험 유형 옵션
+```typescript
+type ExamType = 'TOEFL' | 'TOEIC' | 'DELE';
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. 레이아웃 구조
+- 상단: 시험 유형 선택 드롭다운
+- 중앙: 에세이 입력 영역
+- 하단: 제출 버튼 (고정)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 기능 요구사항
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. 필수 기능
+- 백엔드 API 연동
+- 시험 유형 필수 선택
+- 빈 에세이 제출 방지
+- 제출 시 로딩 상태 표시
 
-## Learn More
+### 2. 선택 기능
+- 입력 중인 텍스트 자동 저장
 
-To learn more about Next.js, take a look at the following resources:
+## UI/UX 요구사항
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. 레이아웃
+- 반응형 디자인
+- 적절한 여백과 간격
+- 모던하고 깔끔한 디자인
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. 스타일링
+- 사용자 친화적인 폰트 크기
+- 적절한 색상 대비
+- 일관된 디자인 시스템 적용

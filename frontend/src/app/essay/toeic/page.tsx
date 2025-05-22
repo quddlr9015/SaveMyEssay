@@ -11,81 +11,43 @@ import { Progress } from '@/components/ui/progress';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 
-const TEST_TYPES = {
-  'TOEFL': ['Independent', 'Integrated'],
-  'TOEIC': ['Basic', 'Advanced'],
-  'GRE': ['Issue', 'Argument'],
-  'DELE': ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+const TEST_TYPES = ['Basic', 'Advanced'];
+const WORD_LIMITS = {
+  'Basic': 200,
+  'Advanced': 300
 };
 
-type TestType = keyof typeof TEST_TYPES;
-type TestLevel = {
-  TOEFL: 'Independent' | 'Integrated';
-  TOEIC: 'Basic' | 'Advanced';
-  GRE: 'Issue' | 'Argument';
-  DELE: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-}[TestType];
-
-type WordLimits = {
-  TOEFL: { 'Independent': number; 'Integrated': number };
-  TOEIC: { 'Basic': number; 'Advanced': number };
-  GRE: { 'Issue': number; 'Argument': number };
-  DELE: { 'A1': number; 'A2': number; 'B1': number; 'B2': number; 'C1': number; 'C2': number };
+const TEMPLATES = {
+  'Basic': 'The topic is about [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
+  'Advanced': 'The given topic discusses [Topic].\n\nTo begin with, [First point]\nFurthermore, [Second point]\nMoreover, [Third point]\nIn conclusion, [Conclusion]'
 };
 
-const WORD_LIMITS: WordLimits = {
-  'TOEFL': { 'Independent': 300, 'Integrated': 150 },
-  'TOEIC': { 'Basic': 200, 'Advanced': 300 },
-  'GRE': { 'Issue': 500, 'Argument': 400 },
-  'DELE': { 'A1': 100, 'A2': 200, 'B1': 300, 'B2': 400, 'C1': 500, 'C2': 600 }
-};
-
-const TEMPLATES: Record<TestType, Partial<Record<TestLevel, string>>> = {
-  'TOEFL': {
-    'Independent': 'Do you agree or disagree with the following statement? [Your opinion here]\n\nFirst, [First reason]\nSecond, [Second reason]\nFinally, [Conclusion]',
-    'Integrated': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
-  },
-  'TOEIC': {},
-  'GRE': {},
-  'DELE': {}
-};
-
-export default function EssayPage() {
+export default function TOEICEssayPage() {
   const router = useRouter();
-  const [selectedTest, setSelectedTest] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
   const [essay, setEssay] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
-  const [defaultTest, setDefaultTest] = useState<string>('');
 
   // 자동 저장 기능
   useEffect(() => {
     const autoSave = () => {
       if (essay) {
-        localStorage.setItem('draft_essay', essay);
+        localStorage.setItem('toeic_draft_essay', essay);
       }
     };
 
-    const interval = setInterval(autoSave, 30000); // 30초마다 자동 저장
+    const interval = setInterval(autoSave, 30000);
     return () => clearInterval(interval);
   }, [essay]);
 
   // 초기 로드 시 저장된 초안 불러오기
   useEffect(() => {
-    const savedDraft = localStorage.getItem('draft_essay');
+    const savedDraft = localStorage.getItem('toeic_draft_essay');
     if (savedDraft) {
       setEssay(savedDraft);
-    }
-  }, []);
-
-  // 초기 로드 시 저장된 기본 시험 불러오기
-  useEffect(() => {
-    const savedDefaultTest = localStorage.getItem('default_test');
-    if (savedDefaultTest) {
-      setDefaultTest(savedDefaultTest);
     }
   }, []);
 
@@ -100,7 +62,7 @@ export default function EssayPage() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedTest || !selectedType || !essay) {
+    if (!selectedType || !essay) {
       alert('모든 필드를 입력해주세요.');
       return;
     }
@@ -122,7 +84,7 @@ export default function EssayPage() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          testName: selectedTest,
+          testName: 'TOEIC',
           testLevel: selectedType,
           essayContents: essay,
           lang: 'en',
@@ -135,7 +97,7 @@ export default function EssayPage() {
       }
 
       const result = await response.json();
-      localStorage.removeItem('draft_essay'); // 제출 후 초안 삭제
+      localStorage.removeItem('toeic_draft_essay');
       router.push(`/essay/feedback?id=${result.id}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
@@ -146,8 +108,8 @@ export default function EssayPage() {
   };
 
   const applyTemplate = () => {
-    if (selectedTest && selectedType) {
-      const template = TEMPLATES[selectedTest as TestType]?.[selectedType as TestLevel];
+    if (selectedType) {
+      const template = TEMPLATES[selectedType as keyof typeof TEMPLATES];
       if (template) {
         setEssay(template);
         startTimer();
@@ -155,20 +117,7 @@ export default function EssayPage() {
     }
   };
 
-  const wordLimit = selectedTest && selectedType 
-    ? WORD_LIMITS[selectedTest as keyof WordLimits][selectedType as keyof WordLimits[keyof WordLimits]]
-    : 0;
-
-  const handleTestSelect = (test: string) => {
-    setDefaultTest(test);
-    localStorage.setItem('default_test', test);
-  };
-
-  const handleStartWriting = () => {
-    if (defaultTest) {
-      router.push(`/essay/${defaultTest.toLowerCase()}`);
-    }
-  };
+  const wordLimit = selectedType ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS] : 0;
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] p-6">
@@ -184,7 +133,7 @@ export default function EssayPage() {
           transition={{ delay: 0.2 }}
           className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
         >
-          Essay Writing
+          TOEIC Essay Writing
         </motion.h1>
         
         <motion.div
@@ -194,48 +143,27 @@ export default function EssayPage() {
         >
           <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">기본 시험 설정</CardTitle>
+              <CardTitle className="text-xl font-medium text-gray-900">문제 유형</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-gray-600">기본 시험 선택</label>
-                  <Select value={defaultTest} onValueChange={handleTestSelect}>
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder="기본 시험 선택" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      {Object.keys(TEST_TYPES).map((test) => (
-                        <SelectItem 
-                          key={test} 
-                          value={test}
-                          className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                        >
-                          {test}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(TEST_TYPES).map(([test, types]) => (
-                    <Card key={test} className="border border-gray-100">
-                      <CardHeader>
-                        <CardTitle className="text-lg">{test}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {types.map((type) => (
-                            <li key={type} className="text-sm text-gray-600">
-                              • {type}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-3 text-gray-600">문제 유형</label>
+                <Select value={selectedType} onValueChange={setSelectedType}>
+                  <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                    <SelectValue placeholder="문제 유형 선택" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
+                    {TEST_TYPES.map((type) => (
+                      <SelectItem 
+                        key={type} 
+                        value={type}
+                        className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                      >
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -265,7 +193,7 @@ export default function EssayPage() {
                 <Button 
                   variant="outline" 
                   onClick={applyTemplate}
-                  disabled={!selectedTest || !selectedType}
+                  disabled={!selectedType}
                   className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                 >
                   템플릿 적용
@@ -300,11 +228,11 @@ export default function EssayPage() {
             취소
           </Button>
           <Button 
-            onClick={handleStartWriting}
-            disabled={!defaultTest}
+            onClick={handleSubmit}
+            disabled={isSubmitting || !selectedType || !essay}
             className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
           >
-            에세이 작성 시작하기
+            {isSubmitting ? '제출 중...' : '제출하기'}
           </Button>
         </motion.div>
       </motion.div>

@@ -7,7 +7,7 @@ export default function SignIn() {
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
-    window.location.href = "http://localhost:4000/google/login";
+    window.location.href = "http://localhost:4000/auth/google/login";
   };
 
   return (

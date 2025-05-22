@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { NavigationBar } from '@/components/NavigationBar';
+import { Toaster } from 'sonner';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           </main>
           <LanguageSelector />
         </Providers>
+        <Toaster />
       </body>
     </html>
   );

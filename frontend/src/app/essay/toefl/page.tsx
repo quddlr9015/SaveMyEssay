@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,8 @@ import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
 import { Progress } from '@/components/ui/progress';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
+import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
+import { Howl } from 'howler';
 
 const TEST_TYPES = ['Independent', 'Integrated'];
 const WORD_LIMITS = {
@@ -46,30 +48,123 @@ export default function TOEFLEssayPage() {
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showListeningPassage, setShowListeningPassage] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
+  const [sound, setSound] = useState<Howl | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 오디오 URL 유효성 검사 및 변환
-  const getAudioUrl = (url: string): string => {
-    try {
-      // Google Cloud Storage URL인지 확인
-      if (url.includes('storage.googleapis.com')) {
-        // URL이 이미 서명된 URL인지 확인
-        if (url.includes('X-Goog-Signature')) {
-          return url;
+  // 오디오 URL 설정
+  useEffect(() => {
+    if (selectedQuestion?.listeningPassageUrl) {
+      console.log(`[Audio] Setting audio URL for question:`, selectedQuestion.id);
+      setIsAudioLoading(true);
+      
+      const newSound = new Howl({
+        src: [selectedQuestion.listeningPassageUrl],
+        html5: true,
+        onload: () => {
+          setIsAudioLoading(false);
+          setDuration(newSound.duration());
+        },
+        onloaderror: () => {
+          console.error('Error loading audio');
+          alert('오디오 파일을 불러오는데 실패했습니다.');
+          setIsAudioLoading(false);
+        },
+        onplay: () => setIsPlaying(true),
+        onpause: () => setIsPlaying(false),
+        onstop: () => setIsPlaying(false),
+        onend: () => {
+          setIsPlaying(false);
+          setCurrentTime(0);
         }
-        // 필요한 경우 여기에 URL 서명 로직 추가
-        return url;
+      });
+
+      setSound(newSound);
+      setAudioUrl(selectedQuestion.listeningPassageUrl);
+
+      return () => {
+        newSound.unload();
+      };
+    }
+  }, [selectedQuestion]);
+
+  // 오디오 재생/일시정지 토글
+  const handlePlayPause = () => {
+    if (sound) {
+      if (isPlaying) {
+        sound.pause();
+      } else {
+        sound.play();
       }
-      return url;
-    } catch (error) {
-      console.error('Error processing audio URL:', error);
-      return url; // 에러 발생 시 원본 URL 반환
     }
   };
 
-  // 오디오 로드 에러 처리
-  const handleAudioError = (event: React.SyntheticEvent<HTMLAudioElement, Event>) => {
-    console.error('Error loading audio:', event);
-    alert('오디오 파일을 불러오는데 실패했습니다.');
+  // 오디오 볼륨 변경
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (sound) {
+      sound.volume(newVolume);
+    }
+    if (newVolume === 0) {
+      setIsMuted(true);
+    } else {
+      setIsMuted(false);
+    }
+  };
+
+  // 오디오 음소거 토글
+  const handleMute = () => {
+    if (sound) {
+      if (isMuted) {
+        sound.volume(volume);
+        setIsMuted(false);
+      } else {
+        sound.volume(0);
+        setIsMuted(true);
+      }
+    }
+  };
+
+  // 오디오 반복 토글
+  const handleLoop = () => {
+    if (sound) {
+      sound.loop(!isLooping);
+      setIsLooping(!isLooping);
+    }
+  };
+
+  // 오디오 시간 업데이트
+  useEffect(() => {
+    if (!sound) return;
+
+    const updateProgress = () => {
+      if (!isDragging) {
+        setCurrentTime(sound.seek());
+      }
+    };
+
+    const interval = setInterval(updateProgress, 100);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [sound, isDragging]);
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTime = parseFloat(e.target.value);
+    setCurrentTime(newTime);
+    if (sound) {
+      sound.seek(newTime);
+    }
   };
 
   // 문제 목록 가져오기
@@ -84,6 +179,11 @@ export default function TOEFLEssayPage() {
           router.push('/login');
           return;
         }
+
+        console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?testType=TOEFL&testLevel=${selectedType}&category=ESSAY&questionType=${selectedType}`);
+        console.log('[Questions API] Request Headers:', {
+          'Authorization': `Bearer ${token}`,
+        });
 
         const response = await fetch(
           `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?testType=TOEFL&testLevel=${selectedType}&category=ESSAY&questionType=${selectedType}`,
@@ -100,9 +200,10 @@ export default function TOEFLEssayPage() {
         }
 
         const data = await response.json();
+        console.log('[Questions API] Response Data:', data);
         setQuestions(data);
       } catch (error) {
-        console.error('Error fetching questions:', error);
+        console.error('[Questions API] Error:', error);
         alert('문제 목록을 가져오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
@@ -137,9 +238,8 @@ export default function TOEFLEssayPage() {
       }
 
       const data = await response.json();
-      if (data && data.length > 0) {
-        setSelectedQuestion(data[0]);
-      }
+      console.log('Selected Question Data:', data);
+      setSelectedQuestion(data);
     } catch (error) {
       console.error('Error fetching question:', error);
       alert('문제를 가져오는 중 오류가 발생했습니다.');
@@ -176,6 +276,14 @@ export default function TOEFLEssayPage() {
   // 타이머 시작
   const startTimer = () => {
     setIsTimerRunning(true);
+  };
+
+  // 시간 포맷팅 함수
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const handleSubmit = async () => {
@@ -353,16 +461,64 @@ export default function TOEFLEssayPage() {
                       )}
                     </div>
                   )}
-                  {selectedQuestion.listeningPassageUrl && (
+                  {selectedQuestion?.listeningPassageUrl && (
                     <div className="mt-4">
                       <h4 className="font-medium mb-2">Listening Audio:</h4>
-                      <audio 
-                        controls 
-                        className="w-full"
-                        src={selectedQuestion.listeningPassageUrl}
-                      >
-                        Your browser does not support the audio element.
-                      </audio>
+                      <div className="w-full bg-white rounded-lg p-4 shadow-sm">
+                        {isAudioLoading ? (
+                          <div className="text-center py-4">오디오 로딩 중...</div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4">
+                                <button
+                                  onClick={handlePlayPause}
+                                  className="p-2 rounded-full hover:bg-gray-100"
+                                >
+                                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                                </button>
+                                <button
+                                  onClick={handleMute}
+                                  className="p-2 rounded-full hover:bg-gray-100"
+                                >
+                                  {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                                </button>
+                                <button
+                                  onClick={handleLoop}
+                                  className={`p-2 rounded-full hover:bg-gray-100 ${isLooping ? 'text-blue-500' : ''}`}
+                                >
+                                  <Repeat size={24} />
+                                </button>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-sm text-gray-500">{formatTime(currentTime)}</span>
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={duration || 0}
+                                  value={currentTime}
+                                  onChange={handleSeek}
+                                  className="w-64"
+                                />
+                                <span className="text-sm text-gray-500">{formatTime(duration)}</span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <VolumeX size={20} />
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={1}
+                                  step={0.1}
+                                  value={volume}
+                                  onChange={handleVolumeChange}
+                                  className="w-24"
+                                />
+                                <Volume2 size={20} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

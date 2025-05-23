@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
         SUBMIT: '/essay_grader/submit',
         QUESTION_LIST: '/essay_grader/question/list',
         QUESTIONS: '/essay_grader/questions',
+        AUDIO: '/essay_grader/audio',
     },
 } as const;
 

@@ -1,17 +1,17 @@
 import { DataSource, Repository } from "typeorm";
-import { User } from "./user.entity";
+import { User } from "./entities/user.entity";
 import { ConflictException, Injectable, InternalServerErrorException } from "@nestjs/common";
-import { AuthCredentialDto } from "./dto/authCredential.dto";
+import { AuthCredentialDto } from "../auth/dto/authCredential.dto";
 import * as bcrypt from "bcryptjs";
 
 @Injectable()
-export class UserRepository extends Repository<User> {
+export class UsersRepository extends Repository<User> {
     constructor(private dataSource: DataSource) {
         super(User, dataSource.createEntityManager());
     }
 
-    async createUser(AuthCredentialDto: AuthCredentialDto): Promise<void> {
-        const {username, password} = AuthCredentialDto;
+    async createUser(authCredentialDto: AuthCredentialDto): Promise<void> {
+        const { username, password } = authCredentialDto;
 
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -30,8 +30,5 @@ export class UserRepository extends Repository<User> {
                 throw new InternalServerErrorException();
             }
         }
-        
-
     }
-
-}
+} 

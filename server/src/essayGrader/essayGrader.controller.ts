@@ -1,13 +1,16 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, UseGuards, Param } from '@nestjs/common';
 import { EssayGraderService } from './essayGrader.service';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
-import { User } from '@/auth/user.entity';
+import { User } from '../users/entities/user.entity';
 import { TestType, TestLevel } from './entities/writingQuestion.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Logger } from '@nestjs/common';
 
 @Controller('essay_grader')
 export class EssayGraderController {
     constructor(private readonly essayGraderService: EssayGraderService) { }
 
+    @UseGuards(JwtAuthGuard)
     @Post('/submit')
     async gradeEssay(
         @Body('lang') lang: string,
@@ -20,11 +23,13 @@ export class EssayGraderController {
         return this.essayGraderService.getEssayGrade(testName, testLevel, question, essayContents, lang, user);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('/history')
     async getEssayHistory(@GetUser() user: User) {
         return this.essayGraderService.getEssayHistory(user);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('/questions')
     async getQuestions(
         @Query('testType') testType: TestType,
@@ -32,13 +37,15 @@ export class EssayGraderController {
         @Query('id') id: number,
         @GetUser() user: User
     ) {
-        return this.essayGraderService.getQuestions(testType, testLevel, id, user);
+        return this.essayGraderService.getQuestion(testType, testLevel, id, user);
     }
 
     @Post('/admin/questions')
     async addQuestion(
         @Body('testType') testType: TestType,
         @Body('testLevel') testLevel: TestLevel,
+        @Body('category') category: string,
+        @Body('questionType') questionType: string,
         @Body('title') title: string,
         @Body('question') question: string,
         @Body('sampleAnswer') sampleAnswer: string,
@@ -50,6 +57,8 @@ export class EssayGraderController {
         return this.essayGraderService.addQuestion(
             testType,
             testLevel,
+            category,
+            questionType,
             title,
             question,
             sampleAnswer,
@@ -60,11 +69,14 @@ export class EssayGraderController {
         );
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('/question/list')
     async getQuestionList(
         @Query('testType') testType: TestType,
         @Query('testLevel') testLevel: TestLevel,
+        @Query('category') category: string,
+        @Query('questionType') questionType: string,
     ) {
-        return this.essayGraderService.getQuestionList(testType, testLevel);
+        return this.essayGraderService.getQuestionList(testType, testLevel, category, questionType);
     }
 } 

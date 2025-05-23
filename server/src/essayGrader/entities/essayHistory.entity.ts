@@ -1,44 +1,48 @@
-import { User } from '@/auth/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class EssayHistory {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => User, user => user.boards, { eager: false })
-    user: User;
-
-    @Column()
+    @Column({ nullable: true })
     testName: string;
 
-    @Column()
+    @Column({ nullable: true })
     testLevel: string;
 
-    @Column()
+    @Column('text', { nullable: true })
     question: string;
 
-    @Column('text')
+    @Column('text', { nullable: true })
     essay: string;
 
-    @Column()
+    @Column('float', { nullable: true })
     score: number;
 
-    @Column('text')
+    @Column('text', { nullable: true })
     feedback: string;
 
-    @Column('simple-array')
+    @Column('simple-array', { nullable: true })
     grammar: string[];
 
-    @Column('simple-array')
+    @Column('simple-array', { nullable: true })
     vocabulary: string[];
 
-    @Column('simple-array')
+    @Column('simple-array', { nullable: true })
     content: string[];
 
-    @Column('simple-array')
+    @Column('simple-array', { nullable: true })
     organization: string[];
 
     @CreateDateColumn()
     createdAt: Date;
+
+    @ManyToOne(type => User, user => user.essays)
+    @JoinColumn({ name: 'userId' })
+    user: User;
+
+    @Column({ nullable: false })
+    userId: string;
 } 

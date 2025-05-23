@@ -1,11 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EssayHistory } from './entities/essayHistory.entity';
-import { User } from '@/auth/user.entity';
+import { User } from '../users/entities/user.entity';
 import { WritingQuestion, TestType, TestLevel, QuestionType } from './entities/writingQuestion.entity';
+import { QuestionResponseDto } from './dto/question-response.dto';
 
 @Injectable()
 export class EssayGraderService {
@@ -50,6 +51,12 @@ export class EssayGraderService {
 
     async getEssayGrade(testName: string, testLevel: string, question: string, essayContents: string, lang: string, user: User): Promise<any> {
         try {
+            // user 객체 검증을 메서드 시작 부분으로 이동
+            if (!user || !user.id) {
+                Logger.error(`[ChatGPT Service] Invalid user: ${JSON.stringify(user)}`);
+                throw new Error('유효하지 않은 사용자 정보입니다.');
+            }
+
             const systemPrompt = testName === 'DELE'
                 ? `You are a ${testName} ${testLevel} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${lang}`
                 : `You are a ${testName} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${lang}`;
@@ -64,28 +71,49 @@ export class EssayGraderService {
             try {
                 const gradeResult = JSON.parse(completion);
 
-                // Save to database
-                const essayGrade = this.essayGradeRepository.create({
-                    user,
-                    testName,
-                    testLevel,
-                    question,
-                    essay: essayContents,
-                    score: gradeResult.score,
-                    feedback: gradeResult.feedback,
-                    grammar: gradeResult.details.grammar,
-                    vocabulary: gradeResult.details.vocabulary,
-                    content: gradeResult.details.content,
-                    organization: gradeResult.details.organization,
-                });
+                // 필수 필드 검증
+                if (!gradeResult.score || !gradeResult.feedback || !gradeResult.details) {
+                    throw new Error('필수 필드가 누락되었습니다.');
+                }
 
-                await this.essayGradeRepository.save(essayGrade);
+                // details 객체의 필수 필드 검증
+                const requiredDetails = ['grammar', 'vocabulary', 'content', 'organization'];
+                for (const field of requiredDetails) {
+                    if (!Array.isArray(gradeResult.details[field])) {
+                        throw new Error(`${field} 필드가 배열이 아닙니다.`);
+                    }
+                }
 
-                return gradeResult;
+                try {
+                    // Save to database
+                    const essayGrade = this.essayGradeRepository.create({
+                        user: { id: user.id },
+                        testName,
+                        testLevel,
+                        question,
+                        essay: essayContents,
+                        score: gradeResult.score,
+                        feedback: gradeResult.feedback,
+                        grammar: gradeResult.details.grammar,
+                        vocabulary: gradeResult.details.vocabulary,
+                        content: gradeResult.details.content,
+                        organization: gradeResult.details.organization,
+                    });
+
+                    await this.essayGradeRepository.save(essayGrade);
+                    Logger.log(`[ChatGPT Service] Successfully saved essay grade to database for user ${user.id}`);
+
+                    return gradeResult;
+                } catch (dbError) {
+                    Logger.error(`[ChatGPT Service] Database error: ${dbError.message}`);
+                    throw new Error('데이터베이스 저장 중 오류가 발생했습니다.');
+                }
             } catch (e) {
+                Logger.error(`[ChatGPT Service] Error processing grade result: ${e.message}`);
+                Logger.error(`[ChatGPT Service] Raw completion: ${completion}`);
                 return {
                     score: 0,
-                    feedback: completion,
+                    feedback: '채점 처리 중 오류가 발생했습니다.',
                     details: {
                         grammar: [],
                         vocabulary: [],
@@ -100,13 +128,13 @@ export class EssayGraderService {
         }
     }
 
-    async getQuestions(testType: TestType, testLevel: TestLevel | null, number: number, user: User): Promise<WritingQuestion[]> {
-        Logger.log(`[EssayGrader Service] Getting question with ID: ${number} for testType: ${testType}, testLevel: ${testLevel}`);
+    async getQuestion(testType: TestType, testLevel: TestLevel | null, id: number, user: User): Promise<QuestionResponseDto> {
+        Logger.log(`[EssayGrader Service] Getting question with ID: ${id} for testType: ${testType}, testLevel: ${testLevel}`);
 
         const whereCondition: any = {
             testType,
             isActive: true,
-            id: number
+            id: id
         };
 
         // DELE나 IELTS의 경우에만 testLevel 조건 추가
@@ -114,18 +142,36 @@ export class EssayGraderService {
             whereCondition.testLevel = testLevel;
         }
 
-        const questions = await this.questionRepository.find({
+        const question = await this.questionRepository.findOne({
             where: whereCondition,
             select: ['title', 'question', 'readingPassage', 'listeningPassage', 'listeningPassageUrl', 'questionType', 'timeLimit', 'points']
         });
 
-        Logger.log(`[EssayGrader Service] Question with ID ${number} ${questions.length > 0 ? 'found' : 'not found'}`);
-        return questions;
+        if (!question) {
+            throw new NotFoundException(`Question with ID ${id} not found`);
+        }
+
+        Logger.log(`[EssayGrader Service] Question with ID ${id} found`);
+
+        const responseDto: QuestionResponseDto = {
+            title: question.title,
+            question: question.question,
+            readingPassage: question.readingPassage,
+            listeningPassage: question.listeningPassage,
+            listeningPassageUrl: question.listeningPassageUrl,
+            questionType: question.questionType as QuestionType,
+            timeLimit: question.timeLimit,
+            points: question.points
+        };
+
+        return responseDto;
     }
 
     async addQuestion(
         testType: TestType,
         testLevel: TestLevel,
+        category: string,
+        questionType: string,
         title: string,
         question: string,
         sampleAnswer: string,
@@ -137,6 +183,8 @@ export class EssayGraderService {
         const newQuestion = this.questionRepository.create({
             testType,
             testLevel,
+            category,
+            questionType,
             title,
             question,
             sampleAnswer,
@@ -144,14 +192,13 @@ export class EssayGraderService {
             listeningPassage,
             listeningPassageUrl,
             description: '',
-            questionType: QuestionType.ESSAY,
             isActive: true
         });
 
         return this.questionRepository.save(newQuestion);
     }
 
-    async getQuestionList(testType: TestType, testLevel: TestLevel): Promise<{ title: string }[]> {
+    async getQuestionList(testType: TestType, testLevel: TestLevel, category: string, questionType: string): Promise<{ title: string }[]> {
         Logger.log(`[EssayGrader Service] Getting question list for testType: ${testType}, testLevel: ${testLevel}`);
 
         const whereCondition: any = {
@@ -161,6 +208,14 @@ export class EssayGraderService {
 
         if (testLevel && (testType === TestType.DELE || testType === TestType.IELTS)) {
             whereCondition.testLevel = testLevel;
+        }
+
+        if (category) {
+            whereCondition.category = category;
+        }
+
+        if (questionType) {
+            whereCondition.questionType = questionType;
         }
 
         const questions = await this.questionRepository.find({

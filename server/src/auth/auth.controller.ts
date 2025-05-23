@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards, UsePipes, ValidationPipe, UnauthorizedException } from '@nestjs/common';
 import { AuthCredentialDto } from './dto/authCredential.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
+import { GoogleSignUpDto } from './dto/google-signup.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export default class AuthController {
@@ -23,9 +25,23 @@ export default class AuthController {
     }
 
     @Get('/check')
-    @UseGuards(AuthGuard())
-    checkSession(@Req() req) {
-        return { authenticated: true, user: req.user };
+    @UseGuards(JwtAuthGuard)
+    async checkSession(@Req() req) {
+        try {
+            Logger.log('Session check request received');
+            Logger.log('Request headers:', req.headers);
+
+            if (!req.user) {
+                Logger.warn('User not found in request');
+                throw new UnauthorizedException('User not authenticated');
+            }
+
+            Logger.log('User authenticated:', req.user);
+            return { authenticated: true, user: req.user };
+        } catch (error) {
+            Logger.error('Authentication failed:', error);
+            throw new UnauthorizedException('Authentication failed');
+        }
     }
 
     // Google 소셜 로그인 구현
@@ -51,7 +67,20 @@ export default class AuthController {
         const result = await this.authService.googleLogin(req);
         Logger.debug("Google Login successed: ", result);
 
-        // JWT 토큰을 쿠키에 저장
+        // 새로운 사용자인 경우 회원가입 페이지로 리다이렉트
+        if (result.isNewUser) {
+            const params = new URLSearchParams({
+                email: result.user.email,
+                name: result.user.name,
+            });
+            return res.redirect(`http://localhost:3000/auth/signup?${params.toString()}`);
+        }
+
+        // 기존 사용자인 경우 대시보드로 리다이렉트
+        if (!result.accessToken) {
+            throw new UnauthorizedException('Access token not found');
+        }
+
         res.cookie('access_token', result.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -59,8 +88,15 @@ export default class AuthController {
             maxAge: 24 * 60 * 60 * 1000 // 24시간
         });
 
-        // 프론트엔드로 리다이렉트
-        res.redirect('http://localhost:3000/dashboard');
+        // 토큰을 URL 파라미터로도 전달
+        const params = new URLSearchParams();
+        params.append('token', result.accessToken);
+        res.redirect(`http://localhost:3000/dashboard?${params.toString()}`);
+    }
+
+    @Post('/google/signup')
+    async googleSignUp(@Body() googleSignUpDto: GoogleSignUpDto) {
+        return this.authService.completeGoogleSignUp(googleSignUpDto);
     }
 
     @Post('/test')

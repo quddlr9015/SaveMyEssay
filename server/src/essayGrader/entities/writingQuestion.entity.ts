@@ -58,7 +58,14 @@ export class WritingQuestion {
 
     @Column({
         type: 'varchar',
-        comment: '문제 유형 (ESSAY, READING, LISTENING, SPEAKING)'
+        comment: '문제 카테고리 (ESSAY, READING, LISTENING, SPEAKING)'
+    })
+    category: string;
+
+    @Column({
+        type: 'varchar',
+        nullable: true,
+        comment: '문제 유형 (예: TOEFL 에세이의 INTEGRATED/INDEPENDENT, IELTS의 ACADEMIC/GENERAL 등)'
     })
     questionType: string;
 

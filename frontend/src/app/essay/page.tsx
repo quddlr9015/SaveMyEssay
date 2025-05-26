@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
-import { Progress } from '@/components/ui/progress';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 
@@ -271,10 +270,6 @@ export default function EssayPage() {
                   템플릿 적용
                 </Button>
               </div>
-              <Progress 
-                value={(wordCount / wordLimit) * 100} 
-                className="mb-6 h-1 bg-gray-100"
-              />
               <Textarea
                 placeholder="에세이를 작성해주세요..."
                 value={essay}

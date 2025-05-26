@@ -16,6 +16,11 @@ const WORD_LIMITS = {
   'Advanced': 300
 };
 
+const TIME_LIMITS = {
+  'Basic': 30, // 30분
+  'Advanced': 45 // 45분
+};
+
 const TEMPLATES = {
   'Basic': 'The topic is about [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
   'Advanced': 'The given topic discusses [Topic].\n\nTo begin with, [First point]\nFurthermore, [Second point]\nMoreover, [Third point]\nIn conclusion, [Conclusion]'
@@ -180,11 +185,18 @@ export default function TOEICEssayPage() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-6">
-                  <Timer 
-                    isRunning={isTimerRunning} 
-                    onTick={setTimeElapsed}
-                    className="text-sm font-medium text-gray-600"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Timer 
+                      isRunning={isTimerRunning} 
+                      onTick={setTimeElapsed}
+                      className="text-sm font-medium text-gray-600"
+                    />
+                    {selectedType && (
+                      <span className="text-sm font-medium text-gray-500">
+                        (제한시간: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}분)
+                      </span>
+                    )}
+                  </div>
                   <span className="text-sm font-medium text-gray-600">
                     {wordCount} / {wordLimit} 단어
                   </span>

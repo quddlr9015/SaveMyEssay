@@ -171,7 +171,7 @@ export class EssayGraderService {
         testType: TestType,
         testLevel: TestLevel,
         category: string,
-        questionType: string,
+        questionType: QuestionType,
         title: string,
         question: string,
         sampleAnswer: string,

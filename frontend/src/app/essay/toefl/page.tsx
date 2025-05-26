@@ -12,14 +12,19 @@ import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
 import { Howl } from 'howler';
 
-const TEST_TYPES = ['Independent', 'Integrated'];
+const TEST_TYPES = ['Academic Discussion', 'Integrated'];
 const WORD_LIMITS = {
-  'Independent': 300,
+  'Academic Discussion': 100,
   'Integrated': 150
 };
 
+const TIME_LIMITS = {
+  'Academic Discussion': 10, // 10분
+  'Integrated': 20 // 20분
+};
+
 const TEMPLATES = {
-  'Independent': 'Do you agree or disagree with the following statement? [Your opinion here]\n\nFirst, [First reason]\nSecond, [Second reason]\nFinally, [Conclusion]',
+  'Academic Discussion': 'I agree/disagree with [Professor\'s name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
   'Integrated': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
 };
 
@@ -538,11 +543,18 @@ export default function TOEFLEssayPage() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-6">
-                  <Timer 
-                    isRunning={isTimerRunning} 
-                    onTick={setTimeElapsed}
-                    className="text-sm font-medium text-gray-600"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Timer 
+                      isRunning={isTimerRunning} 
+                      onTick={setTimeElapsed}
+                      className="text-sm font-medium text-gray-600"
+                    />
+                    {selectedType && (
+                      <span className="text-sm font-medium text-gray-500">
+                        (제한시간: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}분)
+                      </span>
+                    )}
+                  </div>
                   <span className="text-sm font-medium text-gray-600">
                     {wordCount} / {wordLimit} 단어
                   </span>

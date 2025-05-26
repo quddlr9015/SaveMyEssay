@@ -5,6 +5,7 @@ import { User } from '../users/entities/user.entity';
 import { TestType, TestLevel } from './entities/writingQuestion.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Logger } from '@nestjs/common';
+import { QuestionType } from './entities/writingQuestion.entity';
 
 @Controller('essay_grader')
 export class EssayGraderController {
@@ -45,7 +46,7 @@ export class EssayGraderController {
         @Body('testType') testType: TestType,
         @Body('testLevel') testLevel: TestLevel,
         @Body('category') category: string,
-        @Body('questionType') questionType: string,
+        @Body('questionType') questionType: QuestionType,
         @Body('title') title: string,
         @Body('question') question: string,
         @Body('sampleAnswer') sampleAnswer: string,

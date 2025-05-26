@@ -20,6 +20,15 @@ const WORD_LIMITS = {
   'C2': 600
 };
 
+const TIME_LIMITS = {
+  'A1': 20, // 20분
+  'A2': 25, // 25분
+  'B1': 30, // 30분
+  'B2': 35, // 35분
+  'C1': 40, // 40분
+  'C2': 45 // 45분
+};
+
 const TEMPLATES = {
   'A1': 'El tema es [Tema].\n\nPrimero, [Primer punto]\nSegundo, [Segundo punto]\nFinalmente, [Conclusión]',
   'A2': 'El tema principal es [Tema].\n\nEn primer lugar, [Primer punto]\nEn segundo lugar, [Segundo punto]\nPara terminar, [Conclusión]',
@@ -188,11 +197,18 @@ export default function DEEssayPage() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-6">
-                  <Timer 
-                    isRunning={isTimerRunning} 
-                    onTick={setTimeElapsed}
-                    className="text-sm font-medium text-gray-600"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Timer 
+                      isRunning={isTimerRunning} 
+                      onTick={setTimeElapsed}
+                      className="text-sm font-medium text-gray-600"
+                    />
+                    {selectedType && (
+                      <span className="text-sm font-medium text-gray-500">
+                        (제한시간: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}분)
+                      </span>
+                    )}
+                  </div>
                   <span className="text-sm font-medium text-gray-600">
                     {wordCount} / {wordLimit} 단어
                   </span>

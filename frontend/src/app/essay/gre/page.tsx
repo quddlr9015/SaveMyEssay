@@ -16,6 +16,11 @@ const WORD_LIMITS = {
   'Argument': 400
 };
 
+const TIME_LIMITS = {
+  'Issue': 30, // 30분
+  'Argument': 30 // 30분
+};
+
 const TEMPLATES = {
   'Issue': 'The issue at hand is [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nThird, [Third point]\nIn conclusion, [Conclusion]',
   'Argument': 'The argument presented states that [Argument].\n\nFirst, [First analysis]\nSecond, [Second analysis]\nThird, [Third analysis]\nIn conclusion, [Conclusion]'
@@ -180,11 +185,18 @@ export default function GREEssayPage() {
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-6">
-                  <Timer 
-                    isRunning={isTimerRunning} 
-                    onTick={setTimeElapsed}
-                    className="text-sm font-medium text-gray-600"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Timer 
+                      isRunning={isTimerRunning} 
+                      onTick={setTimeElapsed}
+                      className="text-sm font-medium text-gray-600"
+                    />
+                    {selectedType && (
+                      <span className="text-sm font-medium text-gray-500">
+                        (제한시간: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}분)
+                      </span>
+                    )}
+                  </div>
                   <span className="text-sm font-medium text-gray-600">
                     {wordCount} / {wordLimit} 단어
                   </span>

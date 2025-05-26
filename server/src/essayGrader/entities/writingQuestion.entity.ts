@@ -10,6 +10,10 @@ export enum TestType {
 }
 
 export enum TestLevel {
+    // TOEFL 레벨
+    TOEFL_ACADEMIC_DISCUSSION = 'TOEFL_ACADEMIC_DISCUSSION',
+    TOEFL_INTEGRATED = 'TOEFL_INTEGRATED',
+
     // DELE 레벨
     DELE_A1 = 'DELE_A1',
     DELE_A2 = 'DELE_A2',
@@ -31,7 +35,9 @@ export enum QuestionType {
     ESSAY = 'ESSAY',
     READING = 'READING',
     LISTENING = 'LISTENING',
-    SPEAKING = 'SPEAKING'
+    SPEAKING = 'SPEAKING',
+    ACADEMIC_DISCUSSION = 'ACADEMIC_DISCUSSION',
+    INTEGRATED = 'INTEGRATED'
 }
 
 @Entity()
@@ -63,11 +69,13 @@ export class WritingQuestion {
     category: string;
 
     @Column({
-        type: 'varchar',
+        type: 'enum',
+        enum: QuestionType,
+        default: QuestionType.ESSAY,
         nullable: true,
-        comment: '문제 유형 (예: TOEFL 에세이의 INTEGRATED/INDEPENDENT, IELTS의 ACADEMIC/GENERAL 등)'
+        comment: '문제 유형 (예: TOEFL 에세이의 ACADEMIC_DISCUSSION/INTEGRATED, IELTS의 ACADEMIC/GENERAL 등)'
     })
-    questionType: string;
+    questionType: QuestionType;
 
     @Column('text', {
         comment: '문제에 대한 상세 설명'

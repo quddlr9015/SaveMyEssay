@@ -11,29 +11,28 @@ import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 
 const TEST_TYPES = {
-  'TOEFL': ['Independent', 'Integrated'],
+  'TOEFL': ['Academic Discussion', 'Integrated'],
   'TOEIC': ['Basic', 'Advanced'],
   'GRE': ['Issue', 'Argument'],
   'DELE': ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 };
 
-type TestType = keyof typeof TEST_TYPES;
-type TestLevel = {
-  TOEFL: 'Independent' | 'Integrated';
-  TOEIC: 'Basic' | 'Advanced';
-  GRE: 'Issue' | 'Argument';
-  DELE: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
-}[TestType];
+type TestType = 'TOEFL' | 'TOEIC' | 'GRE' | 'DELE';
+type TestLevel = 
+  | 'Academic Discussion' | 'Integrated'  // TOEFL
+  | 'Basic' | 'Advanced'  // TOEIC
+  | 'Issue' | 'Argument'  // GRE
+  | 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';  // DELE
 
-type WordLimits = {
-  TOEFL: { 'Independent': number; 'Integrated': number };
+interface WordLimits {
+  TOEFL: { 'Academic Discussion': number; 'Integrated': number };
   TOEIC: { 'Basic': number; 'Advanced': number };
   GRE: { 'Issue': number; 'Argument': number };
   DELE: { 'A1': number; 'A2': number; 'B1': number; 'B2': number; 'C1': number; 'C2': number };
-};
+}
 
 const WORD_LIMITS: WordLimits = {
-  'TOEFL': { 'Independent': 300, 'Integrated': 150 },
+  'TOEFL': { 'Academic Discussion': 100, 'Integrated': 150 },
   'TOEIC': { 'Basic': 200, 'Advanced': 300 },
   'GRE': { 'Issue': 500, 'Argument': 400 },
   'DELE': { 'A1': 100, 'A2': 200, 'B1': 300, 'B2': 400, 'C1': 500, 'C2': 600 }
@@ -41,7 +40,7 @@ const WORD_LIMITS: WordLimits = {
 
 const TEMPLATES: Record<TestType, Partial<Record<TestLevel, string>>> = {
   'TOEFL': {
-    'Independent': 'Do you agree or disagree with the following statement? [Your opinion here]\n\nFirst, [First reason]\nSecond, [Second reason]\nFinally, [Conclusion]',
+    'Academic Discussion': 'I agree/disagree with [Professor\'s name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
     'Integrated': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
   },
   'TOEIC': {},

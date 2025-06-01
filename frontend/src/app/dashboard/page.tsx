@@ -224,7 +224,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">에세이 채점 대시보드</h1>
+      <h1 className="text-3xl font-bold">Studylo</h1>
       
       {/* 시험 종류 선택 */}
       <div className="flex gap-4">

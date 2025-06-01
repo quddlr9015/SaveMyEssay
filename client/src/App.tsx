@@ -8,12 +8,9 @@ function App() {
     <Router>
       <AppBar position="static">
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            에세이 채점 시스템
+          <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
+            Studylo
           </Typography>
-          <Button color="inherit" component={Link} to="/">
-            홈
-          </Button>
           <Button color="inherit" component={Link} to="/history">
             히스토리
           </Button>

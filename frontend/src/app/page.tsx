@@ -11,7 +11,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-gray-900">에세이 채점 시스템</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Studylo</h1>
             </div>
             <div>
               <Link
@@ -29,7 +29,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-            AI 기반 에세이 평가 서비스
+            Studylo
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             인공지능이 당신의 에세이를 분석하고 평가합니다. 빠르고 정확한 피드백으로 글쓰기 실력을 향상시키세요.

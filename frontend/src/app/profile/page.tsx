@@ -62,7 +62,7 @@ export default function ProfilePage() {
         toast.success('로그아웃되었습니다.');
         localStorage.clear();
         sessionStorage.clear();
-        router.push('/auth/login');
+        router.push('/');
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -107,14 +107,8 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>내 정보</CardTitle>
-          <Button 
-            variant="destructive" 
-            onClick={handleLogout}
-          >
-            로그아웃
-          </Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center space-y-6">
@@ -159,6 +153,32 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <div className="text-sm font-medium text-gray-500">가입일</div>
                 <div className="text-lg">{new Date(profile.createdAt).toLocaleDateString('ko-KR')}</div>
+              </div>
+
+              <div className="flex justify-center pt-4">
+                <Button 
+                  variant="outline"
+                  className="hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition-colors duration-200 cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  로그아웃
+                </Button>
               </div>
               
               {profile.lastLoginAt && (

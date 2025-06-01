@@ -13,11 +13,10 @@ import { motion } from 'framer-motion';
 const TEST_TYPES = {
   'TOEFL': ['Academic Discussion', 'Integrated'],
   'TOEIC': ['Basic', 'Advanced'],
-  'GRE': ['Issue', 'Argument'],
-  'DELE': ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+  'SAT': ['Essay']
 };
 
-type TestType = 'TOEFL' | 'TOEIC' | 'GRE' | 'DELE';
+type TestType = 'TOEFL' | 'TOEIC' | 'GRE' | 'DELE' | 'SAT';
 type TestLevel = 
   | 'Academic Discussion' | 'Integrated'  // TOEFL
   | 'Basic' | 'Advanced'  // TOEIC
@@ -45,19 +44,22 @@ const TEMPLATES: Record<TestType, Partial<Record<TestLevel, string>>> = {
   },
   'TOEIC': {},
   'GRE': {},
-  'DELE': {}
+  'DELE': {},
+  'SAT': {}
 };
 
 export default function EssayPage() {
   const router = useRouter();
   const [selectedTest, setSelectedTest] = useState<string>('');
-  const [selectedType, setSelectedType] = useState<string>('');
+  const [targetScore, setTargetScore] = useState<string>('');
+  const [showScoreInput, setShowScoreInput] = useState(false);
   const [essay, setEssay] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [defaultTest, setDefaultTest] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>('');
 
   // 자동 저장 기능
   useEffect(() => {
@@ -158,148 +160,147 @@ export default function EssayPage() {
     : 0;
 
   const handleTestSelect = (test: string) => {
-    setDefaultTest(test);
-    localStorage.setItem('default_test', test);
+    setSelectedTest(test);
+    setShowScoreInput(true);
   };
 
-  const handleStartWriting = () => {
-    if (defaultTest) {
-      router.push(`/essay/${defaultTest.toLowerCase()}`);
+  const handleScoreSubmit = () => {
+    if (!targetScore) {
+      alert('목표 점수를 입력해주세요.');
+      return;
+    }
+    
+    // 선택한 시험과 목표 점수를 로컬 스토리지에 저장
+    localStorage.setItem('selectedTest', selectedTest);
+    localStorage.setItem('targetScore', targetScore);
+    
+    // 해당 시험의 writing 페이지로 이동
+    router.push(`/essay/${selectedTest.toLowerCase()}`);
+  };
+
+  const getScoreRange = (test: string) => {
+    switch (test) {
+      case 'TOEFL':
+        return '0-30 (Writing 섹션)';
+      case 'TOEIC':
+        return '0-200 (Writing 섹션)';
+      case 'SAT':
+        return '2-8 (Writing 점수)';
+      default:
+        return '';
+    }
+  };
+
+  const getScorePlaceholder = (test: string) => {
+    switch (test) {
+      case 'TOEFL':
+        return '예: 25';
+      case 'TOEIC':
+        return '예: 180';
+      case 'SAT':
+        return '예: 6';
+      default:
+        return '목표 점수 입력';
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-6">
+    <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center overflow-hidden">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="container mx-auto space-y-8 max-w-4xl"
+        className="container mx-auto max-w-2xl text-center space-y-8 relative"
       >
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
-        >
-          Essay Writing
-        </motion.h1>
-        
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          animate={{ 
+            x: showScoreInput ? '-100%' : 0,
+            opacity: showScoreInput ? 0 : 1
+          }}
+          transition={{ duration: 0.5 }}
+          className="absolute w-full"
         >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">기본 시험 설정</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-gray-600">기본 시험 선택</label>
-                  <Select value={defaultTest} onValueChange={handleTestSelect}>
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder="기본 시험 선택" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      {Object.keys(TEST_TYPES).map((test) => (
-                        <SelectItem 
-                          key={test} 
-                          value={test}
-                          className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                        >
-                          {test}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(TEST_TYPES).map(([test, types]) => (
-                    <Card key={test} className="border border-gray-100">
-                      <CardHeader>
-                        <CardTitle className="text-lg">{test}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-2">
-                          {types.map((type) => (
-                            <li key={type} className="text-sm text-gray-600">
-                              • {type}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold text-gray-900 tracking-tight mb-12"
+          >
+            어떤 시험을 준비하시나요?
+          </motion.h1>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 gap-4"
+          >
+            {Object.keys(TEST_TYPES).map((test) => (
+              <Button
+                key={test}
+                onClick={() => handleTestSelect(test)}
+                className="h-16 text-xl font-medium bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+              >
+                {test}
+              </Button>
+            ))}
+          </motion.div>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          initial={{ x: '100%', opacity: 0 }}
+          animate={{ 
+            x: showScoreInput ? 0 : '100%',
+            opacity: showScoreInput ? 1 : 0
+          }}
+          transition={{ duration: 0.5 }}
+          className="absolute w-full"
         >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">에세이 작성</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-6">
-                  <Timer 
-                    isRunning={isTimerRunning} 
-                    onTick={setTimeElapsed}
-                    className="text-sm font-medium text-gray-600"
-                  />
-                  <span className="text-sm font-medium text-gray-600">
-                    {wordCount} / {wordLimit} 단어
-                  </span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={applyTemplate}
-                  disabled={!selectedTest || !selectedType}
-                  className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-4xl font-bold text-gray-900 tracking-tight mb-12"
+          >
+            목표 점수를 입력해주세요
+          </motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
+            <div className="text-lg text-gray-600 mb-8">
+              {selectedTest} 시험의 점수 범위: {getScoreRange(selectedTest)}
+            </div>
+            
+            <div className="flex flex-col items-center space-y-4">
+              <input
+                type="number"
+                value={targetScore}
+                onChange={(e) => setTargetScore(e.target.value)}
+                placeholder={getScorePlaceholder(selectedTest)}
+                className="w-48 h-16 text-center text-2xl font-medium border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-200"
+              />
+              
+              <div className="flex space-x-4 mt-8">
+                <Button
+                  onClick={() => setShowScoreInput(false)}
+                  variant="outline"
+                  className="px-8 py-3"
                 >
-                  템플릿 적용
+                  뒤로
+                </Button>
+                <Button
+                  onClick={handleScoreSubmit}
+                  className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800"
+                >
+                  확인
                 </Button>
               </div>
-              <Textarea
-                placeholder="에세이를 작성해주세요..."
-                value={essay}
-                onChange={(e) => setEssay(e.target.value)}
-                className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
-                onFocus={startTimer}
-              />
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex justify-end space-x-4"
-        >
-          <Button 
-            variant="outline"
-            onClick={() => router.push('/dashboard')}
-            className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-          >
-            취소
-          </Button>
-          <Button 
-            onClick={handleStartWriting}
-            disabled={!defaultTest}
-            className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-          >
-            에세이 작성 시작하기
-          </Button>
+            </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { fetchApi } from '@/utils/api';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 interface UserProfile {
   id: string;
@@ -31,6 +33,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchProfile();
@@ -45,6 +48,25 @@ export default function ProfilePage() {
       toast.error('프로필 정보를 불러오는데 실패했습니다.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetchApi('/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response) {
+        toast.success('로그아웃되었습니다.');
+        localStorage.clear();
+        sessionStorage.clear();
+        router.push('/auth/login');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -85,8 +107,14 @@ export default function ProfilePage() {
   return (
     <div className="container mx-auto py-8">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>내 정보</CardTitle>
+          <Button 
+            variant="destructive" 
+            onClick={handleLogout}
+          >
+            로그아웃
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center space-y-6">

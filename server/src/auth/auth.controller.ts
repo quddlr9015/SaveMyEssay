@@ -106,4 +106,27 @@ export default class AuthController {
     ) {
         console.log(req);
     }
+
+    @Post('/logout')
+    @UseGuards(JwtAuthGuard)
+    async logout(@Req() req, @Res() res: Response) {
+        try {
+            Logger.log('Logout request received');
+
+            // 쿠키에서 access_token 제거
+            res.clearCookie('access_token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax'
+            });
+
+            return res.status(200).json({
+                message: '로그아웃되었습니다.',
+                success: true
+            });
+        } catch (error) {
+            Logger.error('Logout failed:', error);
+            throw new UnauthorizedException('로그아웃 중 오류가 발생했습니다.');
+        }
+    }
 }

@@ -202,23 +202,22 @@ export class EssayGraderService {
     }
 
     async getQuestionList(testType: TestType, testLevel: TestLevel, category: string, questionType: string): Promise<{ title: string }[]> {
-        Logger.log(`[EssayGrader Service] Getting question list for testType: ${testType}, testLevel: ${testLevel}`);
+        Logger.log(`[EssayGrader Service] Getting question list for testType: ${testType}, questionType: ${questionType}`);
 
         const whereCondition: any = {
             testType,
             isActive: true
         };
 
-        if (testLevel && (testType === TestType.DELE || testType === TestType.IELTS)) {
+        // TOEFL의 경우 questionType으로만 필터링
+        if (testType === TestType.TOEFL) {
+            whereCondition.questionType = questionType;
+        } else if (testLevel && (testType === TestType.DELE || testType === TestType.IELTS)) {
             whereCondition.testLevel = testLevel;
         }
 
         if (category) {
             whereCondition.category = category;
-        }
-
-        if (questionType) {
-            whereCondition.questionType = questionType;
         }
 
         const questions = await this.questionRepository.find({

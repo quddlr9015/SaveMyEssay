@@ -12,20 +12,20 @@ import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
 import { Howl } from 'howler';
 
-const TEST_TYPES = ['Academic Discussion', 'Integrated'];
+const TEST_TYPES = ['ACADEMIC_DISCUSSION', 'INTEGRATED'];
 const WORD_LIMITS = {
-  'Academic Discussion': 100,
-  'Integrated': 150
+  'ACADEMIC_DISCUSSION': 100,
+  'INTEGRATED': 150
 };
 
 const TIME_LIMITS = {
-  'Academic Discussion': 10, // 10분
-  'Integrated': 20 // 20분
+  'ACADEMIC_DISCUSSION': 10, // 10분
+  'INTEGRATED': 20 // 20분
 };
 
 const TEMPLATES = {
-  'Academic Discussion': 'I agree/disagree with [Professor\'s name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
-  'Integrated': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
+  'ACADEMIC_DISCUSSION': 'I agree/disagree with [Professor\'s name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
+  'INTEGRATED': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
 };
 
 interface Question {
@@ -184,13 +184,19 @@ export default function TOEFLEssayPage() {
           return;
         }
 
-        console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?testType=TOEFL&testLevel=${selectedType}&category=ESSAY&questionType=${selectedType}`);
+        const params = new URLSearchParams({
+          testType: 'TOEFL',
+          category: 'ESSAY',
+          questionType: selectedType
+        });
+
+        console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`);
         console.log('[Questions API] Request Headers:', {
           'Authorization': `Bearer ${token}`,
         });
 
         const response = await fetch(
-          `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?testType=TOEFL&testLevel=${selectedType}&category=ESSAY&questionType=${selectedType}`,
+          `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
           {
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -200,7 +206,8 @@ export default function TOEFLEssayPage() {
         );
 
         if (!response.ok) {
-          throw new Error('문제 목록을 가져오는데 실패했습니다.');
+          const errorData = await response.json().catch(() => null);
+          throw new Error(errorData?.message || '문제 목록을 가져오는데 실패했습니다.');
         }
 
         const data = await response.json();
@@ -208,7 +215,7 @@ export default function TOEFLEssayPage() {
         setQuestions(data);
       } catch (error) {
         console.error('[Questions API] Error:', error);
-        alert('문제 목록을 가져오는 중 오류가 발생했습니다.');
+        alert(error instanceof Error ? error.message : '문제 목록을 가져오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
       }

@@ -80,4 +80,14 @@ export class EssayGraderController {
     ) {
         return this.essayGraderService.getQuestionList(testType, testLevel, category, questionType);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('/target-score')
+    async setTargetScore(
+        @Body('testType') testType: string,
+        @Body('targetScore') targetScore: number,
+        @GetUser() user: User
+    ) {
+        return this.essayGraderService.setTargetScore(testType, targetScore, user);
+    }
 } 

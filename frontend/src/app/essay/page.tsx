@@ -164,18 +164,42 @@ export default function EssayPage() {
     setShowScoreInput(true);
   };
 
-  const handleScoreSubmit = () => {
+  const handleScoreSubmit = async () => {
     if (!targetScore) {
       alert('목표 점수를 입력해주세요.');
       return;
     }
-    
-    // 선택한 시험과 목표 점수를 로컬 스토리지에 저장
-    localStorage.setItem('selectedTest', selectedTest);
-    localStorage.setItem('targetScore', targetScore);
-    
-    // 해당 시험의 writing 페이지로 이동
-    router.push(`/essay/${selectedTest.toLowerCase()}`);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SET_TARGET_SCORE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          testType: selectedTest,
+          targetScore: parseInt(targetScore)
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('목표 점수 저장에 실패했습니다.');
+      }
+
+      // 성공적으로 저장되면 해당 시험의 writing 페이지로 이동
+      router.push(`/essay/${selectedTest.toLowerCase()}`);
+    } catch (error) {
+      console.error('Error setting target score:', error);
+      alert('목표 점수 저장 중 오류가 발생했습니다.');
+    }
   };
 
   const getScoreRange = (test: string) => {

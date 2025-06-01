@@ -7,6 +7,7 @@ import { EssayHistory } from './entities/essayHistory.entity';
 import { User } from '../users/entities/user.entity';
 import { WritingQuestion, TestType, TestLevel, QuestionType } from './entities/writingQuestion.entity';
 import { QuestionResponseDto } from './dto/question-response.dto';
+import { TargetScore } from './entities/targetScore.entity';
 
 @Injectable()
 export class EssayGraderService {
@@ -18,6 +19,8 @@ export class EssayGraderService {
         private essayGradeRepository: Repository<EssayHistory>,
         @InjectRepository(WritingQuestion)
         private questionRepository: Repository<WritingQuestion>,
+        @InjectRepository(TargetScore)
+        private targetScoreRepository: Repository<TargetScore>,
     ) {
         this.openai = new OpenAI({
             apiKey: this.configService.get('OPENAI_KEY'),
@@ -225,5 +228,33 @@ export class EssayGraderService {
 
         Logger.log(`[EssayGrader Service] Found ${questions.length} questions`);
         return questions;
+    }
+
+    async setTargetScore(testType: string, targetScore: number, user: User) {
+        try {
+            // 기존 목표 점수가 있는지 확인
+            const existingTarget = await this.targetScoreRepository.findOne({
+                where: { user: { id: user.id }, testType }
+            });
+
+            if (existingTarget) {
+                // 기존 목표 점수 업데이트
+                existingTarget.targetScore = targetScore;
+                await this.targetScoreRepository.save(existingTarget);
+                return { success: true, message: '목표 점수가 업데이트되었습니다.' };
+            } else {
+                // 새로운 목표 점수 생성
+                const newTarget = this.targetScoreRepository.create({
+                    testType,
+                    targetScore,
+                    user
+                });
+                await this.targetScoreRepository.save(newTarget);
+                return { success: true, message: '목표 점수가 저장되었습니다.' };
+            }
+        } catch (error) {
+            Logger.error(`[EssayGrader Service] Error setting target score: ${error.message}`);
+            throw new Error('목표 점수 저장 중 오류가 발생했습니다.');
+        }
     }
 } 

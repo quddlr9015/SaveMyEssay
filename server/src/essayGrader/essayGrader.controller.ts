@@ -90,4 +90,10 @@ export class EssayGraderController {
     ) {
         return this.essayGraderService.setTargetScore(testType, targetScore, user);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('/target-score')
+    async getTargetScore(@GetUser() user: User) {
+        return this.essayGraderService.getTargetScore(user);
+    }
 } 

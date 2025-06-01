@@ -257,4 +257,16 @@ export class EssayGraderService {
             throw new Error('목표 점수 저장 중 오류가 발생했습니다.');
         }
     }
+
+    async getTargetScore(user: User) {
+        const targetScore = await this.targetScoreRepository.findOne({
+            where: { user: { id: user.id } },
+            order: { createdAt: 'DESC' }
+        });
+
+        return {
+            testType: targetScore?.testType || null,
+            targetScore: targetScore?.targetScore || null
+        };
+    }
 } 

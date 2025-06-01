@@ -43,6 +43,11 @@ interface Statistics {
   [key: string]: TestStatistics;
 }
 
+interface TargetScore {
+  testType: string;
+  targetScore: number;
+}
+
 const TEST_MAX_SCORES: { [key: string]: number } = {
   'TOEFL': 30,
   'TOEIC': 200,
@@ -60,6 +65,7 @@ export default function DashboardPage() {
   const [sortOrder, setSortOrder] = useState('desc');
   const [selectedTest, setSelectedTest] = useState<string>('');
   const [statistics, setStatistics] = useState<Statistics>({});
+  const [targetScore, setTargetScore] = useState<TargetScore | null>(null);
 
   useEffect(() => {
     // URL에서 토큰 가져오기
@@ -105,8 +111,8 @@ export default function DashboardPage() {
         const stats = calculateStatistics(data);
         setStatistics(stats);
 
-        // 가장 최근에 본 시험 찾기
-        if (data.length > 0) {
+        // 목표 점수가 없는 경우에만 가장 최근 에세이의 시험을 기본값으로 설정
+        if (!targetScore?.testType && data.length > 0) {
           const latestEssay = data.sort((a: EssayHistory, b: EssayHistory) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
@@ -122,6 +128,33 @@ export default function DashboardPage() {
     };
 
     fetchHistories();
+  }, [targetScore?.testType]); // targetScore.testType이 변경될 때마다 실행
+
+  useEffect(() => {
+    const fetchTargetScore = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:4000/essay_grader/target-score', {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setTargetScore(data);
+          // 목표 점수가 있으면 해당 시험을 기본값으로 설정
+          if (data.testType) {
+            setSelectedTest(data.testType);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching target score:', error);
+      }
+    };
+
+    fetchTargetScore();
   }, []);
 
   const calculateStatistics = (data: EssayHistory[]): Statistics => {
@@ -226,6 +259,27 @@ export default function DashboardPage() {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold">Studylo</h1>
       
+      {/* 목표 점수 카드 */}
+      {targetScore && targetScore.testType && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>현재 목표</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-500">시험 종류</p>
+                <p className="text-xl font-semibold">{targetScore.testType}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">목표 점수</p>
+                <p className="text-xl font-semibold">{targetScore.targetScore}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 시험 종류 선택 */}
       <div className="flex gap-4">
         <Select value={selectedTest} onValueChange={setSelectedTest}>

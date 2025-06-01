@@ -25,7 +25,7 @@ export function NavigationBar() {
         <div className="flex justify-between h-16 items-center">
           <div className="flex items-center space-x-4">
             <Link
-              href={isLoggedIn ? "/dashboard" : "/"}
+              href="/dashboard"
               className="text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
             >
               <div className="flex items-center gap-2">

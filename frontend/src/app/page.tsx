@@ -2,8 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // 로컬 스토리지에서 토큰 확인
+    const token = localStorage.getItem('token');
+    if (token) {
+      // 토큰이 있으면 대시보드로 리다이렉트
+      router.push('/dashboard');
+    }
+  }, [router]);
+
+  const handleLogoClick = () => {
+    router.push('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* 네비게이션 바 */}
@@ -11,7 +27,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-gray-900">Studylo</h1>
+              <h1 
+                className="text-2xl font-bold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors" 
+                onClick={handleLogoClick}
+              >
+                Studylo
+              </h1>
             </div>
             <div>
               <Link

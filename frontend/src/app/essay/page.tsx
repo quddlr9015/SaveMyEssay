@@ -61,6 +61,33 @@ export default function EssayPage() {
   const [defaultTest, setDefaultTest] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
 
+  // 사용자의 목표 점수 설정 여부 확인
+  useEffect(() => {
+    const checkTargetScore = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.GET_TARGET_SCORE}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.testType) {
+            router.push(`/essay/${data.testType.toLowerCase()}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking target score:', error);
+      }
+    };
+
+    checkTargetScore();
+  }, [router]);
+
   // 자동 저장 기능
   useEffect(() => {
     const autoSave = () => {

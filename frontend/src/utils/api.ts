@@ -16,7 +16,8 @@ export const API_ENDPOINTS = {
         QUESTION_LIST: '/essay_grader/question/list',
         QUESTIONS: '/essay_grader/questions',
         AUDIO: '/essay_grader/audio',
-        SET_TARGET_SCORE: '/essay_grader/target-score'
+        SET_TARGET_SCORE: '/essay_grader/target-score',
+        GET_TARGET_SCORE: '/essay_grader/target-score',
     },
 } as const;
 

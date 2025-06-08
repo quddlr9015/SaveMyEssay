@@ -9,7 +9,7 @@ function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
-            Studylo
+            Lingrade
           </Typography>
           <Button color="inherit" component={Link} to="/history">
             히스토리

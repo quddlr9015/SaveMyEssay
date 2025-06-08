@@ -28,10 +28,19 @@ export class EssayGraderService {
     }
 
     async getEssayHistory(user: User): Promise<EssayHistory[]> {
-        return this.essayGradeRepository.find({
-            where: { user },
-            order: { createdAt: 'DESC' }
-        });
+        try {
+            Logger.log(`[EssayGrader Service] Fetching essay history for user ${user.id}`);
+            const histories = await this.essayGradeRepository.find({
+                where: { userId: user.id },
+                order: { createdAt: 'DESC' },
+                relations: ['user']
+            });
+            Logger.log(`[EssayGrader Service] Found ${histories.length} essays for user ${user.id}`);
+            return histories;
+        } catch (error) {
+            Logger.error(`[EssayGrader Service] Error fetching essay history: ${error.message}`);
+            throw new Error('에세이 기록을 불러오는 중 오류가 발생했습니다.');
+        }
     }
 
     async getResFromGPT(systemPrompt: string, userPrompt: string): Promise<string> {

@@ -102,7 +102,7 @@ export default function TOEICEssayPage() {
 
       const result = await response.json();
       localStorage.removeItem('toeic_draft_essay');
-      router.push(`/essay/feedback?id=${result.id}`);
+      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=&examType=TOEIC&deleLevel=${selectedType}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
       alert('에세이 제출 중 오류가 발생했습니다.');

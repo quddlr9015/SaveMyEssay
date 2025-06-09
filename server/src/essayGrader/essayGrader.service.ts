@@ -23,7 +23,7 @@ export class EssayGraderService {
         private targetScoreRepository: Repository<TargetScore>,
     ) {
         this.openai = new OpenAI({
-            apiKey: this.configService.get('OPENAI_KEY'),
+            apiKey: this.configService.get<string>('OPENAI_KEY'),
         });
     }
 

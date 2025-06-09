@@ -1,15 +1,15 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import * as dotenv from 'dotenv';
+import { ConfigService } from "@nestjs/config";
 
-dotenv.config();
-
-export const typeOrmConfig: TypeOrmModuleOptions = {
+export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => ({
     type: 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
-    database: process.env.DB_DATABASE || 'BoardApp',
+    host: `/cloudsql/${configService.get<string>('DB_CONNECTION_NAME')}`,
+    username: configService.get<string>('DB_USERNAME', 'postgres'),
+    password: configService.get<string>('DB_PASSWORD', 'postgres'),
+    database: configService.get<string>('DB_DATABASE', 'Lingrade'),
     entities: [__dirname + '/../**/*.entity.{js,ts}'],
     synchronize: true,
-}
+    extra: {
+        socketPath: `/cloudsql/${configService.get<string>('DB_CONNECTION_NAME')}`,
+    },
+});

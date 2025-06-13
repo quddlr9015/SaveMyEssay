@@ -14,4 +14,4 @@ handlers:
     script: auto
     
 beta_settings:
-  cloud_sql_instances: your-db-instance-connection-name
+  cloud_sql_instances: essay-grader-459811:asia-northeast1:essay-grader-db

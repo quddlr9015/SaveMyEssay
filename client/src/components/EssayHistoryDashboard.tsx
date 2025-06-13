@@ -36,7 +36,7 @@ const EssayHistoryDashboard: React.FC = () => {
   useEffect(() => {
     const fetchHistories = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/essay_grader/history', {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/essay_grader/history`, {
           withCredentials: true,
         });
         setHistories(response.data);

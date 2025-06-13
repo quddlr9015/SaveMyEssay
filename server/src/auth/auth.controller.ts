@@ -80,14 +80,14 @@ export default class AuthController {
         if (!result.accessToken) {
             throw new UnauthorizedException('Access token not found');
         }
-
+        Logger.log('setting accessToken');
         res.cookie('access_token', result.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'none', // 쿠키 동일 사이트 접근 제한 해제
             maxAge: 24 * 60 * 60 * 1000 // 24시간
         });
-
+        Logger.log('accessToken set');
         // 토큰을 URL 파라미터로도 전달
         const params = new URLSearchParams();
         params.append('token', result.accessToken);

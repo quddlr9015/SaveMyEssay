@@ -2,12 +2,13 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { getApiUrl } from "@/utils/api";
 
 export default function SignIn() {
   const router = useRouter();
 
   const handleGoogleSignIn = async () => {
-    window.location.href = "http://localhost:4000/auth/google/login";
+    window.location.href = `${getApiUrl()}/auth/google/login`;
   };
 
   return (

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
+import { getApiUrl } from '@/utils/api';
 
 interface EssayHistory {
   id: number;
@@ -81,7 +82,7 @@ export default function DashboardPage() {
         const token = localStorage.getItem('token');
         console.log('Using token:', token);
         
-        const response = await fetch('http://localhost:4000/essay_grader/history', {
+        const response = await fetch(`${getApiUrl()}/essay_grader/history`, {
           credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -134,7 +135,7 @@ export default function DashboardPage() {
     const fetchTargetScore = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:4000/essay_grader/target-score', {
+        const response = await fetch(`${getApiUrl()}/essay_grader/target-score`, {
           credentials: 'include',
           headers: {
             'Authorization': `Bearer ${token}`,

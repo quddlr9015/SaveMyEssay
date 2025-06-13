@@ -42,7 +42,7 @@ jobs:
       - id: 'deploy'
         uses: 'google-github-actions/deploy-appengine@v2'
         with:
-          deliverables: '/server/app.yaml'
+          deliverables: 'server/app.yaml'
           project_id: ${{ secrets.GCP_PROJECT_ID }}
   
       # Example of using the output

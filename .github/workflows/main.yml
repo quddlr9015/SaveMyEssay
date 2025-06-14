@@ -3,12 +3,12 @@ name: Deploy NestJS Backend to GAE
 on:
   push:
     branches:
-      - feature-githubactions
+      - main
     paths:
       - 'server/**'
   pull_request:
     branches:
-      - feature-githubactions
+      - main
     paths:
       - 'server/**'
 

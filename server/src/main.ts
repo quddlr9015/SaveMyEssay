@@ -16,7 +16,7 @@ async function bootstrap() {
   const port = process.env.PORT;
 
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'https://www.savemyessay.com',
     credentials: true,
   });
 

@@ -8,6 +8,11 @@ export enum AuthProvider {
     FACEBOOK = 'facebook',
 }
 
+export enum UserRole {
+    USER = 'user',
+    ADMIN = 'admin',
+}
+
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
@@ -83,4 +88,12 @@ export class User {
 
     @Column({ nullable: true })
     resetPasswordExpires: Date;
+
+    // Role field
+    @Column({
+        type: 'enum',
+        enum: UserRole,
+        default: UserRole.USER
+    })
+    role: UserRole;
 } 

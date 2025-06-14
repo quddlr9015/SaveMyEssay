@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
         try {
             // 토큰 가져오기
             const token = request.cookies.get('access_token')?.value;
-            console.log('Token from cookies:', token);
+            // console.log('Token from cookies:', token);
 
             // 세션 체크 API 호출
             const response = await fetch(`${getApiUrl()}/auth/check`, {
@@ -27,9 +27,9 @@ export async function middleware(request: NextRequest) {
                 },
             });
 
-            console.log('Session check response status:', response.status);
+            // console.log('Session check response status:', response.status);
             const data = await response.json();
-            console.log('Session check response data:', data);
+            // console.log('Session check response data:', data);
 
             // 인증되지 않은 경우 로그인 페이지로 리다이렉트
             if (!response.ok) {

@@ -27,7 +27,7 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
 
     // 로컬 스토리지에서 토큰 가져오기
     const token = localStorage.getItem('token');
-    console.log('Current token:', token); // 토큰 확인
+    // console.log('Current token:', token); // 토큰 확인
 
     const response = await fetch(url, {
         ...options,

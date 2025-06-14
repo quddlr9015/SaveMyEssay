@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getApiUrl } from "@/utils/api";
 
 export default function SignUp() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function SignUp() {
     e.preventDefault();
     
     try {
-      const response = await fetch("http://localhost:4000/auth/google/signup", {
+      const response = await fetch(`${getApiUrl()}/auth/google/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

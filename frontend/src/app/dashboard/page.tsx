@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -56,7 +56,7 @@ const TEST_MAX_SCORES: { [key: string]: number } = {
   'DELE': 25
 };
 
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams();
   const [histories, setHistories] = useState<EssayHistory[]>([]);
   const [filteredHistories, setFilteredHistories] = useState<EssayHistory[]>([]);
@@ -495,5 +495,13 @@ export default function DashboardPage() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 } 

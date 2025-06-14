@@ -84,7 +84,7 @@ export default class AuthController {
         res.cookie('access_token', result.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'none', // 쿠키 동일 사이트 접근 제한 해제
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000 // 24시간
         });
         Logger.log('accessToken set');

@@ -190,10 +190,10 @@ export default function TOEFLEssayPage() {
           questionType: selectedType
         });
 
-        console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`);
-        console.log('[Questions API] Request Headers:', {
-          'Authorization': `Bearer ${token}`,
-        });
+        // console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`);
+        // console.log('[Questions API] Request Headers:', {
+        //   'Authorization': `Bearer ${token}`,
+        // });
 
         const response = await fetch(
           `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
@@ -211,7 +211,7 @@ export default function TOEFLEssayPage() {
         }
 
         const data = await response.json();
-        console.log('[Questions API] Response Data:', data);
+        // console.log('[Questions API] Response Data:', data);
         setQuestions(data);
       } catch (error) {
         console.error('[Questions API] Error:', error);
@@ -249,7 +249,7 @@ export default function TOEFLEssayPage() {
       }
 
       const data = await response.json();
-      console.log('Selected Question Data:', data);
+      // console.log('Selected Question Data:', data);
       setSelectedQuestion(data);
     } catch (error) {
       console.error('Error fetching question:', error);

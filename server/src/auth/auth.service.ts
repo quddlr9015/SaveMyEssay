@@ -27,7 +27,10 @@ export class AuthService {
         const user = await this.userRepository.findOne({ where: { username } });
 
         if (user && await bcrypt.compare(password, user.password)) {
-            const payload = { username };
+            const payload = { 
+                username,
+                role: user.role 
+            };
             const accessToken = this.jwtService.sign(payload);
 
             return { accessToken };
@@ -48,7 +51,7 @@ export class AuthService {
 
         if (existingUser) {
             // 기존 사용자인 경우 바로 로그인
-            const payload = { username: existingUser.username };
+            const payload = { username: existingUser.username, role: existingUser.role };
             const accessToken = this.jwtService.sign(payload);
 
             this.logger.debug(`Google login successful for existing user: ${email}`);
@@ -87,7 +90,7 @@ export class AuthService {
         );
 
         // JWT 토큰 생성
-        const payload = { username: user.username };
+        const payload = { username: user.username, role: user.role };
         const accessToken = this.jwtService.sign(payload);
 
         return {

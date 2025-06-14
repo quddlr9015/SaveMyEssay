@@ -7,11 +7,31 @@ import { useEffect, useState } from "react";
 export function NavigationBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
+    
+    if (token) {
+      try {
+        // JWT 토큰 디코딩
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        
+        const payload = JSON.parse(jsonPayload);
+        setIsAdmin(payload.role === 'admin');
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        setIsAdmin(false);
+      }
+    } else {
+      setIsAdmin(false);
+    }
   }, []);
 
   // 홈 페이지에서는 네비게이션 바를 표시하지 않음
@@ -55,6 +75,18 @@ export function NavigationBar() {
             >
               에세이
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin/questions"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  pathname === "/admin/questions"
+                    ? "text-blue-600"
+                    : "text-gray-700 hover:text-blue-600"
+                }`}
+              >
+                관리자
+              </Link>
+            )}
             <Link
               href="/profile"
               className={`px-3 py-2 rounded-md text-sm font-medium ${

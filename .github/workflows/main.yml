@@ -44,6 +44,7 @@ jobs:
         with:
           deliverables: 'server/app.yaml'
           project_id: ${{ secrets.GCP_PROJECT_ID }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
   
       # Example of using the output
       - id: 'test'

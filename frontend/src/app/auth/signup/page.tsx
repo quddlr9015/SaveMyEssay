@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getApiUrl } from "@/utils/api";
 
@@ -8,9 +8,15 @@ export default function SignUp() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
-    username: searchParams.get("email") || "",
-    name: searchParams.get("name") || "",
+    username: "",
+    name: "",
   });
+
+  useEffect(() => {
+    const email = searchParams.get("email") || "";
+    const name = searchParams.get("name") || "";
+    setFormData({ username: email, name });
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

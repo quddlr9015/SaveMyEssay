@@ -1,22 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getApiUrl } from "@/utils/api";
 
-export default function SignUp() {
+function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
-    username: "",
-    name: "",
+    username: searchParams.get("email") || "",
+    name: searchParams.get("name") || "",
   });
-
-  useEffect(() => {
-    const email = searchParams.get("email") || "";
-    const name = searchParams.get("name") || "";
-    setFormData({ username: email, name });
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,5 +104,13 @@ export default function SignUp() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function SignUp() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 } 

@@ -67,7 +67,6 @@ export default function TOEFLEssayPage() {
   // 오디오 URL 설정
   useEffect(() => {
     if (selectedQuestion?.listeningPassageUrl) {
-      console.log(`[Audio] Setting audio URL for question:`, selectedQuestion.id);
       setIsAudioLoading(true);
       
       const newSound = new Howl({
@@ -190,11 +189,6 @@ export default function TOEFLEssayPage() {
           questionType: selectedType
         });
 
-        // console.log('[Questions API] Request URL:', `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`);
-        // console.log('[Questions API] Request Headers:', {
-        //   'Authorization': `Bearer ${token}`,
-        // });
-
         const response = await fetch(
           `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
           {
@@ -211,10 +205,8 @@ export default function TOEFLEssayPage() {
         }
 
         const data = await response.json();
-        // console.log('[Questions API] Response Data:', data);
         setQuestions(data);
       } catch (error) {
-        console.error('[Questions API] Error:', error);
         alert(error instanceof Error ? error.message : '문제 목록을 가져오는 중 오류가 발생했습니다.');
       } finally {
         setIsLoading(false);
@@ -249,7 +241,6 @@ export default function TOEFLEssayPage() {
       }
 
       const data = await response.json();
-      // console.log('Selected Question Data:', data);
       setSelectedQuestion(data);
     } catch (error) {
       console.error('Error fetching question:', error);

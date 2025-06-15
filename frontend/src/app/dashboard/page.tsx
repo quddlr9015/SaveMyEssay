@@ -80,7 +80,6 @@ function DashboardContent() {
     const fetchHistories = async () => {
       try {
         const token = localStorage.getItem('token');
-        // console.log('Using token:', token);
         
         const response = await fetch(`${getApiUrl()}/essay_grader/history`, {
           credentials: 'include',
@@ -95,7 +94,6 @@ function DashboardContent() {
         }
         
         const data = await response.json();
-        // console.log('Fetched data:', data);
         
         // 데이터가 배열인지 확인
         if (!Array.isArray(data)) {

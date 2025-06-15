@@ -7,7 +7,6 @@ import { loadSecretsAuto } from './configs/secrets.config';
 async function bootstrap() {
   // load secrets from secret manager
   if (process.env.NODE_ENV !== 'development') {
-    console.log('loading secrets from secret manager')
     const secrets = await loadSecretsAuto();
     Object.assign(process.env, secrets);
   }
@@ -16,7 +15,7 @@ async function bootstrap() {
   const port = process.env.PORT;
 
   app.enableCors({
-    origin: "https://savemyessay.com",
+    origin: "https://www.savemyessay.com",
     credentials: true,
   });
 

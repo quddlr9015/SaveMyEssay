@@ -83,8 +83,9 @@ export default class AuthController {
         Logger.log('setting accessToken');
         res.cookie('access_token', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'none',
+            domain: '.savemyessay.com',
             maxAge: 24 * 60 * 60 * 1000 // 24시간
         });
         Logger.log('accessToken set');
@@ -116,8 +117,9 @@ export default class AuthController {
             // 쿠키에서 access_token 제거
             res.clearCookie('access_token', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'none'
+                secure: true,
+                sameSite: 'none',
+                domain: '.savemyessay.com',
             });
 
             return res.status(200).json({

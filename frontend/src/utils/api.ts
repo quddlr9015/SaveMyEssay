@@ -27,7 +27,6 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
 
     // 로컬 스토리지에서 토큰 가져오기
     const token = localStorage.getItem('token');
-    // console.log('Current token:', token); // 토큰 확인
 
     const response = await fetch(url, {
         ...options,
@@ -39,12 +38,8 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
         },
     });
 
-    console.log('Response status:', response.status); // 응답 상태 확인
-    console.log('Response headers:', Object.fromEntries(response.headers.entries())); // 응답 헤더 확인
-
     if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        console.error('Error response:', errorData); // 에러 응답 확인
         throw new Error(errorData?.message || `서버 오류: ${response.status}`);
     }
 

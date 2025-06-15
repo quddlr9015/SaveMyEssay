@@ -13,12 +13,9 @@ export default function Login() {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
-          console.log('No token found, staying on login page');
           setIsLoading(false);
           return;
         }
-
-        // console.log('Checking session with token:', token);
         
         const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.AUTH.CHECK}`, {
           credentials: "include",
@@ -27,18 +24,14 @@ export default function Login() {
           },
         });
         
-        // console.log('Session check response status:', response.status);
         
         if (response.ok) {
-          console.log('Session valid, redirecting to dashboard');
           router.push('/dashboard');
         } else {
-          console.log('Session invalid, staying on login page');
           localStorage.removeItem('token');
           setIsLoading(false);
         }
       } catch (error) {
-        console.error("세션 체크 에러:", error);
         localStorage.removeItem('token');
         setIsLoading(false);
       }

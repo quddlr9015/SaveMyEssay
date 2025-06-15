@@ -73,7 +73,7 @@ export default class AuthController {
                 email: result.user.email,
                 name: result.user.name,
             });
-            return res.redirect(`http://localhost:3000/auth/signup?${params.toString()}`);
+            return res.redirect(`https://www.savemyessay.com/auth/signup?${params.toString()}`);
         }
 
         // 기존 사용자인 경우 대시보드로 리다이렉트
@@ -83,15 +83,16 @@ export default class AuthController {
         Logger.log('setting accessToken');
         res.cookie('access_token', result.accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
+            domain: '.savemyessay.com',
             maxAge: 24 * 60 * 60 * 1000 // 24시간
         });
         Logger.log('accessToken set');
         // 토큰을 URL 파라미터로도 전달
         const params = new URLSearchParams();
         params.append('token', result.accessToken);
-        res.redirect(`http://localhost:3000/dashboard?${params.toString()}`);
+        res.redirect(`https://www.savemyessay.com/dashboard?${params.toString()}`);
     }
 
     @Post('/google/signup')
@@ -116,8 +117,9 @@ export default class AuthController {
             // 쿠키에서 access_token 제거
             res.clearCookie('access_token', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax'
+                secure: true,
+                sameSite: 'none',
+                domain: '.savemyessay.com',
             });
 
             return res.status(200).json({

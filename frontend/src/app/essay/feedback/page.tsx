@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
-export default function FeedbackPage() {
+function FeedbackContent() {
   const searchParams = useSearchParams();
   const score = searchParams.get('score');
   const feedback = searchParams.get('feedback');
@@ -114,5 +115,13 @@ export default function FeedbackPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function FeedbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FeedbackContent />
+    </Suspense>
   );
 } 

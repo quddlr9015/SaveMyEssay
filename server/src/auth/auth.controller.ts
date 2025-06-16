@@ -96,8 +96,19 @@ export default class AuthController {
     }
 
     @Post('/google/signup')
-    async googleSignUp(@Body() googleSignUpDto: GoogleSignUpDto) {
-        return this.authService.completeGoogleSignUp(googleSignUpDto);
+    async googleSignUp(@Body() googleSignUpDto: GoogleSignUpDto, @Res() res: Response) {
+        const result = await this.authService.completeGoogleSignUp(googleSignUpDto);
+        if (!result.accessToken) {
+            throw new UnauthorizedException('Access token not found');
+        }
+        res.cookie('access_token', result.accessToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            domain: '.savemyessay.com',
+            maxAge: 24 * 60 * 60 * 1000 // 24시간
+        }); // 토큰을 쿠키에 저장하지 않음 무한로딩
+        return res.status(200).json(result);
     }
 
     @Post('/test')

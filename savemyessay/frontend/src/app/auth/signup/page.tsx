@@ -111,10 +111,8 @@ function SignUpForm() {
         // 토큰 저장
         if (data.accessToken) {
           localStorage.setItem('token', data.accessToken);
+          router.push("/dashboard");
         }
-        console.log("hello response ok?", response)
-        router.push("/dashboard");
-        return;
       } else {
         console.error("회원가입 실패");
       }

@@ -96,7 +96,6 @@ function SignUpForm() {
       alert('필수 이용약관에 모두 동의해주세요.');
       return;
     }
-    console.log(formData);
     try {
       const response = await fetch(`${getApiUrl()}/auth/google/signup`, {
         method: "POST",
@@ -113,6 +112,7 @@ function SignUpForm() {
         if (data.accessToken) {
           localStorage.setItem('token', data.accessToken);
         }
+        console.log("hello response ok?", response)
         router.push("/dashboard");
       } else {
         console.error("회원가입 실패");

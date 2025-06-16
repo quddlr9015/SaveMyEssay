@@ -10,7 +10,7 @@ import { QuestionResponseDto } from './dto/question-response.dto';
 import { TargetScore } from './entities/targetScore.entity';
 
 @Injectable()
-export class EssayGraderService {
+export class SaveMyEssayService {
     private openai: OpenAI;
 
     constructor(

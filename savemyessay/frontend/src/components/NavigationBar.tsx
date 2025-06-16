@@ -49,7 +49,7 @@ export function NavigationBar() {
               className="text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold">Lingrade</h1>
+                <h1 className="text-xl font-bold">SaveMyEssay</h1>
                 <span className="text-sm text-gray-500">영어 Writing 시험 채점 서비스</span>
               </div>
             </Link>

@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Get, Query, UseGuards, Param } from '@nestjs/common';
-import { EssayGraderService } from './essayGrader.service';
+import { SaveMyEssayService } from './saveMyEssay.service';
 import { GetUser } from '@/auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { TestType, TestLevel } from './entities/writingQuestion.entity';
@@ -8,8 +8,8 @@ import { Logger } from '@nestjs/common';
 import { QuestionType } from './entities/writingQuestion.entity';
 
 @Controller('essay_grader')
-export class EssayGraderController {
-    constructor(private readonly essayGraderService: EssayGraderService) { }
+export class SaveMyEssayController {
+    constructor(private readonly saveMyEssayService: SaveMyEssayService) { }
 
     @UseGuards(JwtAuthGuard)
     @Post('/submit')
@@ -21,13 +21,13 @@ export class EssayGraderController {
         @Body('question') question: string,
         @GetUser() user: User
     ) {
-        return this.essayGraderService.getEssayGrade(testName, testLevel, question, essayContents, lang, user);
+        return this.saveMyEssayService.getEssayGrade(testName, testLevel, question, essayContents, lang, user);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('/history')
     async getEssayHistory(@GetUser() user: User) {
-        return this.essayGraderService.getEssayHistory(user);
+        return this.saveMyEssayService.getEssayHistory(user);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -38,7 +38,7 @@ export class EssayGraderController {
         @Query('id') id: number,
         @GetUser() user: User
     ) {
-        return this.essayGraderService.getQuestion(testType, testLevel, id, user);
+        return this.saveMyEssayService.getQuestion(testType, testLevel, id, user);
     }
 
     @Post('/admin/questions')
@@ -55,7 +55,7 @@ export class EssayGraderController {
         @Body('listeningPassageUrl') listeningPassageUrl: string,
         @GetUser() user: User
     ) {
-        return this.essayGraderService.addQuestion(
+        return this.saveMyEssayService.addQuestion(
             testType,
             testLevel,
             category,
@@ -78,7 +78,7 @@ export class EssayGraderController {
         @Query('category') category: string,
         @Query('questionType') questionType: string,
     ) {
-        return this.essayGraderService.getQuestionList(testType, testLevel, category, questionType);
+        return this.saveMyEssayService.getQuestionList(testType, testLevel, category, questionType);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -88,12 +88,12 @@ export class EssayGraderController {
         @Body('targetScore') targetScore: number,
         @GetUser() user: User
     ) {
-        return this.essayGraderService.setTargetScore(testType, targetScore, user);
+        return this.saveMyEssayService.setTargetScore(testType, targetScore, user);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('/target-score')
     async getTargetScore(@GetUser() user: User) {
-        return this.essayGraderService.getTargetScore(user);
+        return this.saveMyEssayService.getTargetScore(user);
     }
 } 

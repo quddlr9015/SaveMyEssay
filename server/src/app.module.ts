@@ -3,11 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
-import { EssayGraderModule } from './essayGrader/essayGrader.module';
+import { SaveMyEssayModule } from './saveMyEssay/saveMyEssay.module';
 import { UsersModule } from './users/users.module';
-import { loadSecretsAuto } from './configs/secrets.config';
-import * as dotenv from 'dotenv';
-import * as fs from 'fs';
 
 @Module({
   imports: [
@@ -23,7 +20,7 @@ import * as fs from 'fs';
       inject: [ConfigService]
     }),
     AuthModule,
-    EssayGraderModule,
+    SaveMyEssayModule,
     UsersModule],
 })
 export class AppModule { }

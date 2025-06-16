@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Essay } from '../../essayGrader/entities/essay.entity';
+import { Essay } from '../../saveMyEssay/entities/essay.entity';
 
 export enum AuthProvider {
     LOCAL = 'local',

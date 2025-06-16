@@ -114,6 +114,7 @@ function SignUpForm() {
         }
         console.log("hello response ok?", response)
         router.push("/dashboard");
+        return;
       } else {
         console.error("회원가입 실패");
       }

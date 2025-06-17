@@ -1,0 +1,173 @@
+{
+    "HomePage": {
+        "start": "시작하기",
+        "decription": "AI가 당신의 에세이를 분석하고 평가합니다. 빠르고 정확한 피드백으로 글쓰기 능력을 향상시키세요.",
+        "startButton": "무료로 시작하기",
+        "features": {
+            "title": "주요 기능",
+            "feature1": {
+                "title": "AI 기반 평가",
+                "description": "최신 AI 기술을 활용한 정확하고 객관적인 에세이 평가"
+            },
+            "feature2": {
+                "title": "빠른 피드백",
+                "description": "상세한 평가 결과와 개선점을 몇 분 만에 확인"
+            },
+            "feature3": {
+                "title": "상세한 분석",
+                "description": "문법, 구조, 논리성 등 다양한 측면에서의 종합적인 평가"
+            }
+        },
+        "footer": {
+            "copyright": "© 2024 SaveMyEssay. All rights reserved."
+        }
+    },
+    "SignInPage": {
+        "title": "로그인",
+        "googleSignInButton": "Google로 로그인"
+    },
+    "LoginPage": {
+        "title": "환영합니다",
+        "description": "에세이 채점 서비스를 이용하려면 로그인해주세요.",
+        "googleLoginButton": "Google 계정으로 로그인",
+        "termsOfService": "로그인함으로써 서비스의",
+        "termsOfServiceLink": "이용약관",
+        "privacyPolicy": "및",
+        "privacyPolicyLink": "개인정보 처리방침",
+        "or": "또는",
+        "agree": "에 동의하게 됩니다.",
+        "loading": "로딩 중..."
+    },
+    "SignUpPage": {
+        "title": "추가 정보 입력",
+        "description": "서비스 이용을 위한 추가 정보를 입력해주세요",
+        "name": "이름",
+        "more": "더보기",
+        "submit": "가입 완료",
+        "termsOfService": "이용약관 동의",
+        "requiredTerms": "필수 이용약관에 모두 동의해주세요.",
+        "termSection": {
+            "all": {
+                "title": "전체 동의",
+                "content": "모든 약관에 동의합니다."
+            },
+            "service": {
+                "title": "서비스 이용약관 (필수)"
+            },
+            "privacy": {
+                "title": "개인정보 수집 및 이용 동의 (필수)"
+            },
+            "marketing": {
+                "title": "마케팅 정보 수신 동의 (선택)"
+            }
+        }
+    },
+    "DashboardPage": {
+        "goal": "현재 목표",
+        "testType": "시험 종류",
+        "targetScore": "목표 점수",
+        "testName": "시험 이름",
+        "totalEssays": "전체 에세이 수",
+        "averageScore": "평균 점수",
+        "lastEssayDate": "최근 작성일",
+        "scoreTrend": "점수 추이",
+        "date": "날짜",
+        "score": "점수",
+        "totalScore": "만점",
+        "totalScoreDescription": "총 점수는 모든 에세이의 점수를 합산한 값입니다.",
+        "searchPlaceholder": "에세이 검색...",
+        "sortBy": "정렬 기준",
+        "viewDetails": "상세 내용 보기",
+        "question": "문제",
+        "essay": "에세이 내용",
+        "totalFeedback": "전체 피드백",
+        "grammarFeedback": "문법 피드백",
+        "vocabularyFeedback": "어휘 피드백",
+        "contentFeedback": "내용 피드백",
+        "organizationFeedback": "구성 피드백",
+        "dot": "점"
+    },
+    "ProfilePage": {
+        "title": "내 정보",
+        "id": "아이디",
+        "name": "이름",
+        "email": "이메일",
+        "verified": "인증됨",
+        "loginMethod": "로그인 방식",
+        "profileImage": "프로필 이미지",
+        "createdAt": "가입일",
+        "updatedAt": "최근 업데이트",
+        "lastLoginAt": "최근 로그인",
+        "loading": "로딩중...",
+        "profileError": "프로필 정보를 불러오는데 실패했습니다.",
+        "logoutSuccess": "로그아웃되었습니다.",
+        "logoutError": "로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.",
+        "provider": {
+            "local": "이메일",
+            "google": "구글",
+            "github": "깃허브",
+            "facebook": "페이스북"
+        },
+        "logout": "로그아웃",
+        "settings": "설정"
+    },
+    "NavigationBar": {
+        "dashboard": "대시보드",
+        "Essay": "에세이",
+        "profile": "프로필",
+        "description": "영어 Writing 시험 채점 서비스"
+    },
+    "EssayPage": {
+        "testType": "어떤 시험을 준비하시나요?",
+        "targetScore": "목표 점수를 입력해주세요",
+        "scoreRange": "시험의 점수 범위",
+        "back": "뒤로",
+        "check": "확인",
+        "example": "예:",
+        "fillAllFields": "모든 필드를 입력해주세요.",
+        "loginRequired": "로그인이 필요합니다.",
+        "submitFailed": "에세이 제출에 실패했습니다.",
+        "submitError": "에세이 제출 중 오류가 발생했습니다.",
+        "targetScoreInput": "목표 점수를 입력해주세요.",
+        "targetScoreSaveFailed": "목표 점수 저장에 실패했습니다.",
+        "targetScoreSaveError": "목표 점수 저장 중 오류가 발생했습니다.",
+        "section": "섹션",
+        "score": "점수",
+        "inputTargetScore": "목표 점수 입력",
+        "problemType": "문제 유형",
+        "essayWriting": "에세이 작성",
+        "word": "단어",
+        "applyTemplate": "템플릿 적용",
+        "essayWritingPlaceholder": "에세이를 작성해주세요...",
+        "cancel": "취소",
+        "submit": "제출하기",
+        "submitting": "제출 중...",
+        "timeLimit": "제한시간",
+        "minute": "분",
+        "audioError": "오디오 파일을 불러오는데 실패했습니다.",
+        "questionListFailed": "문제 목록을 가져오는데 실패했습니다.",
+        "questionListError": "문제 목록을 가져오는데 오류가 발생했습니다.",
+        "questionFetchFailed": "문제를 가져오는데 실패했습니다.",
+        "questionFetchError": "문제를 가져오는 중 오류가 발생했습니다.",
+        "selectQuestion": "문제 선택",
+        "loading": "로딩 중...",
+        "problem": "문제",
+        "hideListeningPassage": "리스닝 지문 숨기기",
+        "showListeningPassage": "리스닝 지문 보기",
+        "audioLoading": "오디오 로딩 중..."
+    },
+    "FeedbackPage": {
+        "title": "채점 결과",
+        "newEssay": "새로운 에세이 작성",
+        "testInfo": "시험 정보",
+        "testType": "시험 유형",
+        "question": "문제",
+        "submittedEssay": "제출한 에세이",
+        "score": "점수",
+        "overallFeedback": "종합 피드백",
+        "grammarFeedback": "문법 피드백",
+        "vocabularyFeedback": "어휘 피드백",
+        "contentFeedback": "내용 피드백",
+        "organizationFeedback": "구성 피드백"
+    }
+} 

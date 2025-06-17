@@ -1,0 +1,172 @@
+{
+    "HomePage": {
+      "start": "Start",
+      "decription": "AI analyzes and evaluates your essay. Improve your writing skills with fast and accurate feedback.",
+      "startButton": "Start for free",
+      "features": {
+        "title": "Key Features",
+        "feature1": {
+          "title": "AI-based Evaluation",
+          "description": "Latest AI technology for accurate and objective essay evaluation"
+        },
+        "feature2": {
+          "title": "Fast Feedback",
+          "description": "Detailed evaluation results and improvement points in minutes"
+        },
+        "feature3": {
+          "title": "Detailed Analysis",
+          "description": "Comprehensive evaluation in grammar, structure, and logic"
+        }
+      },
+      "footer": {
+        "copyright": "© 2024 SaveMyEssay. All rights reserved."
+      }
+    },
+    "SignInPage": {
+      "title": "Sign In",
+      "googleSignInButton": "Sign In with Google"
+    },
+    "LoginPage": {
+      "title": "Welcome",
+      "description": "To use the essay grading service, please sign in.",
+      "googleLoginButton": "Sign In with Google",
+      "termsOfService": "By signing in, you agree to the service's",
+      "termsOfServiceLink": "Terms of Service",
+      "privacyPolicy": "and",
+      "privacyPolicyLink": "Privacy Policy",
+      "or": "or",
+      "agree": "",
+      "loading": "Loading..."
+    },
+    "SignUpPage": {
+        "title": "Additional Information",
+        "description": "Please enter the additional information for service use.",
+        "name": "Name",
+        "submit": "Sign Up",
+        "more": "More",
+        "termsOfService": "Terms of Service Agreement",
+        "requiredTerms": "Please agree to all required terms.",
+        "termSection": {
+            "all": {
+                "title": "All Agreements",
+                "content": "I agree to all terms."
+            },
+            "service": {
+                "title": "Service Terms of Use (Required)"
+            },
+            "privacy": {
+                "title": "Privacy Policy Agreement (Required)"
+            },
+            "marketing": {
+                "title": "Marketing Information Consent (Optional)"
+            }
+        }
+    },
+    "DashboardPage": {
+        "goal": "Current Goal",
+        "testType": "Test Type",
+        "targetScore": "Target Score",
+        "testName": "Test Name",
+        "totalEssays": "Total Essays",
+        "averageScore": "Average Score",
+        "lastEssayDate": "Last Updated Date",
+        "scoreTrend": "Score Trend",
+        "date": "Date",
+        "score": "Score",
+        "totalScore": "Total Score",
+        "searchPlaceholder": "Search essays...",
+        "sortBy": "Sort by",
+        "viewDetails": "View Details",
+        "question": "Question",
+        "essay": "Essay",
+        "totalFeedback": "Total Feedback",
+        "grammarFeedback": "Grammar Feedback",
+        "vocabularyFeedback": "Vocabulary Feedback",
+        "contentFeedback": "Content Feedback",
+        "organizationFeedback": "Organization Feedback",
+        "dot": ""
+    },
+    "ProfilePage": {
+        "title": "My Profile",
+        "id": "ID",
+        "name": "Name",
+        "email": "Email",
+        "verified": "Verified",
+        "loginMethod": "Login Method",
+        "profileImage": "Profile Image",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At",
+        "lastLoginAt": "Last Login At",
+        "loading": "Loading...",
+        "profileError": "Failed to load profile information.",
+        "logoutSuccess": "Logged out successfully.",
+        "logoutError": "Failed to log out. Please try again.",
+        "provider": {
+            "local": "Email",
+            "google": "Google",
+            "github": "GitHub",
+            "facebook": "Facebook"
+        },
+        "logout": "Logout",
+        "settings": "Settings"
+    },
+    "NavigationBar": {
+        "dashboard": "Dashboard",
+        "Essay": "Essay",
+        "profile": "Profile",
+        "description": "English Writing Test Grading Service"
+    },
+    "EssayPage": {
+        "testType": "What test are you preparing for?",
+        "targetScore": "Enter your target score",
+        "scoreRange": "Score range of the test",
+        "back": "Back",
+        "check": "Check",
+        "example": "E.g.:",
+        "fillAllFields": "Please fill in all fields.",
+        "loginRequired": "Please login to use the service.",
+        "submitFailed": "Essay submission failed.",
+        "submitError": "Essay submission error occurred.",
+        "targetScoreInput": "Enter your target score",
+        "targetScoreSaveFailed": "Failed to save target score.",
+        "targetScoreSaveError": "Error occurred while saving target score.",
+        "section": "Section",
+        "score": "Score",
+        "inputTargetScore": "Enter target score",
+        "problemType": "Question Type",
+        "essayWriting": "Write your essay",
+        "word": "Words",
+        "applyTemplate": "Apply Template",
+        "essayWritingPlaceholder": "Write your essay here...",
+        "cancel": "Cancel",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "timeLimit": "Time Limit",
+        "minute": "minutes",
+        "audioError": "Failed to load audio file.",
+        "questionListFailed": "Failed to load question list.",
+        "questionListError": "Error occurred while loading question list.",
+        "questionFetchFailed": "Failed to load question.",
+        "questionFetchError": "Error occurred while loading question.",
+        "selectQuestion": "Select Question",
+        "loading": "Loading...",
+        "problem": "Question",
+        "hideListeningPassage": "Hide Listening Passage",
+        "showListeningPassage": "Show Listening Passage",
+        "audioLoading": "Loading audio..."
+    },
+    "FeedbackPage": {
+        "title": "Result",
+        "newEssay": "New Essay",
+        "testInfo": "Test Information",
+        "testType": "Test Type",
+        "question": "Question",
+        "submittedEssay": "Submitted Essay",
+        "score": "Score",
+        "overallFeedback": "Overall Feedback",
+        "grammarFeedback": "Grammar Feedback",
+        "vocabularyFeedback": "Vocabulary Feedback",
+        "contentFeedback": "Content Feedback",
+        "organizationFeedback": "Organization Feedback"
+    }
+} 

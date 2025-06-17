@@ -24,7 +24,8 @@ export async function middleware(request: NextRequest) {
             });
 
             const data = await response.json();
-
+            console.log(token);
+            console.log(data);
             // 인증되지 않은 경우 로그인 페이지로 리다이렉트
             if (!response.ok) {
                 const loginUrl = new URL('/login', request.url);

@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getApiUrl } from '@/utils/api';
+import { routing } from './i18n/routing';
+import createMiddleware from 'next-intl/middleware';
+
+const intlMiddleware = createMiddleware(routing);
 
 // 보호된 라우트 목록
-const protectedRoutes = ['/dashboard', '/essay', '/profile'];
+const protectedRoutes = ['/en/dashboard', '/en/essay', '/en/profile', '/ko/dashboard', '/ko/essay', '/ko/profile'];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    console.log("pathname", pathname);
     // 보호된 라우트인지 확인
     const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
@@ -42,5 +47,10 @@ export async function middleware(request: NextRequest) {
 
 // 미들웨어가 실행될 경로 설정
 export const config = {
-    matcher: ['/dashboard/:path*', '/essay/:path*', '/profile/:path*'],
+    matcher: [
+        // '/(en|ko)?/dashboard/:path*',
+        // '/(en|ko)?/essay/:path*',
+        // '/(en|ko)?/profile/:path*',
+        '/((?!_next|favicon.ico).*)' // all routes except static assets
+    ]
 }; 

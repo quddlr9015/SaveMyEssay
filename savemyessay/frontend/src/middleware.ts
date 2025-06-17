@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
         try {
             // 토큰 가져오기
             const token = request.cookies.get('access_token')?.value;
-
+            console.log('token check', token);
             // 세션 체크 API 호출
             const response = await fetch(`${getApiUrl()}/auth/check`, {
                 credentials: 'include',
@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-
+            console.log('response', response);
             const data = await response.json();
 
             // 인증되지 않은 경우 로그인 페이지로 리다이렉트

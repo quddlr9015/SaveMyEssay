@@ -1,12 +1,10 @@
 "use client";
 
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { getApiUrl } from "@/utils/api";
+import { useTranslations } from "next-intl";
 
 export default function SignIn() {
-  const router = useRouter();
-
+  const t = useTranslations("SignInPage");
   const handleGoogleSignIn = async () => {
     window.location.href = `${getApiUrl()}/auth/google/login`;
   };
@@ -16,7 +14,7 @@ export default function SignIn() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            로그인
+            {t("title")}
           </h2>
         </div>
         <div className="mt-8 space-y-6">
@@ -24,7 +22,7 @@ export default function SignIn() {
             onClick={handleGoogleSignIn}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Google로 로그인
+            {t("googleSignInButton")}
           </button>
         </div>
       </div>

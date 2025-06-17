@@ -5,12 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
 import { Howl } from 'howler';
+import { useTranslations } from 'next-intl';
 
 const TEST_TYPES = ['ACADEMIC_DISCUSSION', 'INTEGRATED'];
 const WORD_LIMITS = {
@@ -63,6 +64,7 @@ export default function TOEFLEssayPage() {
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const t = useTranslations("EssayPage");
 
   // 오디오 URL 설정
   useEffect(() => {
@@ -78,7 +80,7 @@ export default function TOEFLEssayPage() {
         },
         onloaderror: () => {
           console.error('Error loading audio');
-          alert('오디오 파일을 불러오는데 실패했습니다.');
+          alert(t("audioError"));
           setIsAudioLoading(false);
         },
         onplay: () => setIsPlaying(true),
@@ -201,7 +203,7 @@ export default function TOEFLEssayPage() {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.message || '문제 목록을 가져오는데 실패했습니다.');
+          throw new Error(errorData?.message || t("questionListFailed"));
         }
 
         const data = await response.json();
@@ -237,14 +239,14 @@ export default function TOEFLEssayPage() {
       );
 
       if (!response.ok) {
-        throw new Error('문제를 가져오는데 실패했습니다.');
+        throw new Error(t("questionFetchFailed"));
       }
 
       const data = await response.json();
       setSelectedQuestion(data);
     } catch (error) {
       console.error('Error fetching question:', error);
-      alert('문제를 가져오는 중 오류가 발생했습니다.');
+      alert(t("questionFetchError"));
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +292,7 @@ export default function TOEFLEssayPage() {
 
   const handleSubmit = async () => {
     if (!selectedType || !essay || !selectedQuestion) {
-      alert('모든 필드를 입력해주세요.');
+      alert(t("fillAllFields"));
       return;
     }
 
@@ -298,7 +300,7 @@ export default function TOEFLEssayPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('로그인이 필요합니다.');
+        alert(t("loginRequired"));
         router.push('/login');
         return;
       }
@@ -321,7 +323,7 @@ export default function TOEFLEssayPage() {
       });
 
       if (!response.ok) {
-        throw new Error('에세이 제출에 실패했습니다.');
+        throw new Error(t("submitFailed"));
       }
 
       const result = await response.json();
@@ -329,7 +331,7 @@ export default function TOEFLEssayPage() {
       router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEFL&deleLevel=${selectedType}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
-      alert('에세이 제출 중 오류가 발생했습니다.');
+      alert(t("submitError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -371,15 +373,15 @@ export default function TOEFLEssayPage() {
         >
           <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">문제 유형</CardTitle>
+              <CardTitle className="text-xl font-medium text-gray-900">{t("problemType")}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-3 text-gray-600">문제 유형</label>
+                  <label className="block text-sm font-medium mb-3 text-gray-600">{t("problemType")}</label>
                   <Select value={selectedType} onValueChange={setSelectedType}>
                     <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder="문제 유형 선택" />
+                      <SelectValue placeholder={t("problemType")} />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
                       {TEST_TYPES.map((type) => (
@@ -397,10 +399,10 @@ export default function TOEFLEssayPage() {
 
                 {selectedType && (
                   <div>
-                    <label className="block text-sm font-medium mb-3 text-gray-600">문제 선택</label>
+                    <label className="block text-sm font-medium mb-3 text-gray-600">{t("selectQuestion")}</label>
                     <div className="grid gap-4">
                       {isLoading ? (
-                        <div className="text-center py-4">로딩 중...</div>
+                        <div className="text-center py-4">{t("loading")}</div>
                       ) : (
                         questions.map((question) => (
                           <Card
@@ -434,7 +436,7 @@ export default function TOEFLEssayPage() {
           >
             <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-xl font-medium text-gray-900">문제</CardTitle>
+                <CardTitle className="text-xl font-medium text-gray-900">{t("problem")}</CardTitle>
               </CardHeader>
               <CardContent className="p-6">
                 <div className="prose max-w-none">
@@ -453,7 +455,7 @@ export default function TOEFLEssayPage() {
                         onClick={() => setShowListeningPassage(!showListeningPassage)}
                         className="mb-2"
                       >
-                        {showListeningPassage ? '리스닝 지문 숨기기' : '리스닝 지문 보기'}
+                        {showListeningPassage ? t("hideListeningPassage") : t("showListeningPassage")}
                       </Button>
                       {showListeningPassage && (
                         <div className="p-4 bg-gray-50 rounded-md">
@@ -468,7 +470,7 @@ export default function TOEFLEssayPage() {
                       <h4 className="font-medium mb-2">Listening Audio:</h4>
                       <div className="w-full bg-white rounded-lg p-4 shadow-sm">
                         {isAudioLoading ? (
-                          <div className="text-center py-4">오디오 로딩 중...</div>
+                          <div className="text-center py-4">{t("audioLoading")}</div>
                         ) : (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
@@ -536,7 +538,7 @@ export default function TOEFLEssayPage() {
         >
           <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
             <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">에세이 작성</CardTitle>
+              <CardTitle className="text-xl font-medium text-gray-900">{t("essayWriting")}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -549,12 +551,12 @@ export default function TOEFLEssayPage() {
                     />
                     {selectedType && (
                       <span className="text-sm font-medium text-gray-500">
-                        (제한시간: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}분)
+                        ({t("timeLimit")}: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}{t("minute")})
                       </span>
                     )}
                   </div>
                   <span className="text-sm font-medium text-gray-600">
-                    {wordCount} / {wordLimit} 단어
+                    {wordCount} / {wordLimit} {t("word")}
                   </span>
                 </div>
                 <Button 
@@ -563,11 +565,11 @@ export default function TOEFLEssayPage() {
                   disabled={!selectedType}
                   className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                 >
-                  템플릿 적용
+                  {t("applyTemplate")}
                 </Button>
               </div>
               <Textarea
-                placeholder="에세이를 작성해주세요..."
+                placeholder={t("essayWritingPlaceholder")}
                 value={essay}
                 onChange={(e) => setEssay(e.target.value)}
                 className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
@@ -588,14 +590,14 @@ export default function TOEFLEssayPage() {
             onClick={() => router.push('/dashboard')}
             className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
           >
-            취소
+            {t("cancel")}
           </Button>
           <Button 
             onClick={handleSubmit}
             disabled={isSubmitting || !selectedType || !essay || !selectedQuestion}
             className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
           >
-            {isSubmitting ? '제출 중...' : '제출하기'}
+            {isSubmitting ? t("submitting") : t("submit")}
           </Button>
         </motion.div>
       </motion.div>

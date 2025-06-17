@@ -6,7 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { fetchApi } from '@/utils/api';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const router = useRouter();
+  const t = useTranslations("ProfilePage");
 
   useEffect(() => {
     fetchProfile();
@@ -45,7 +47,7 @@ export default function ProfilePage() {
       const data = await fetchApi('/users/me');
       setProfile(data);
     } catch (error) {
-      toast.error('프로필 정보를 불러오는데 실패했습니다.');
+      toast.error(t("profileError"));
     } finally {
       setIsLoading(false);
     }
@@ -59,14 +61,14 @@ export default function ProfilePage() {
       });
 
       if (response) {
-        toast.success('로그아웃되었습니다.');
+        toast.success(t("logoutSuccess"));
         localStorage.clear();
         sessionStorage.clear();
         router.push('/');
       }
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('로그아웃 중 오류가 발생했습니다. 다시 시도해주세요.');
+      toast.error(t("logoutError"));
     }
   };
 
@@ -75,7 +77,7 @@ export default function ProfilePage() {
       <div className="container mx-auto py-8">
         <Card>
           <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">로딩중...</div>
+            <div className="text-center">{t("loading")}</div>
           </CardContent>
         </Card>
       </div>
@@ -87,7 +89,7 @@ export default function ProfilePage() {
       <div className="container mx-auto py-8">
         <Card>
           <CardContent className="flex items-center justify-center py-8">
-            <div className="text-center">프로필 정보를 불러올 수 없습니다.</div>
+            <div className="text-center">{t("profileError")}</div>
           </CardContent>
         </Card>
       </div>
@@ -96,10 +98,10 @@ export default function ProfilePage() {
 
   const getProviderName = (provider: string) => {
     const providers = {
-      local: '이메일',
-      google: '구글',
-      github: '깃허브',
-      facebook: '페이스북'
+      local: t("provider.local"),
+      google: t("provider.google"),
+      github: t("provider.github"),
+      facebook: t("provider.facebook")
     };
     return providers[provider as keyof typeof providers] || provider;
   };
@@ -108,7 +110,7 @@ export default function ProfilePage() {
     <div className="container mx-auto py-8">
       <Card>
         <CardHeader>
-          <CardTitle>내 정보</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center space-y-6">
@@ -122,36 +124,36 @@ export default function ProfilePage() {
             
             <div className="w-full max-w-md space-y-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-500">아이디</div>
+                <div className="text-sm font-medium text-gray-500">{t("id")}</div>
                 <div className="text-lg">{profile.username}</div>
               </div>
               
               {profile.name && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">이름</div>
+                  <div className="text-sm font-medium text-gray-500">{t("name")}</div>
                   <div className="text-lg">{profile.name}</div>
                 </div>
               )}
               
               {profile.email && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">이메일</div>
+                  <div className="text-sm font-medium text-gray-500">{t("email")}</div>
                   <div className="text-lg">
                     {profile.email}
                     {profile.isEmailVerified && (
-                      <span className="ml-2 text-sm text-green-600">(인증됨)</span>
+                      <span className="ml-2 text-sm text-green-600">({t("verified")})</span>
                     )}
                   </div>
                 </div>
               )}
               
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-500">로그인 방식</div>
+                <div className="text-sm font-medium text-gray-500">{t("loginMethod")}</div>
                 <div className="text-lg">{getProviderName(profile.provider)}</div>
               </div>
               
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-500">가입일</div>
+                <div className="text-sm font-medium text-gray-500">{t("createdAt")}</div>
                 <div className="text-lg">{new Date(profile.createdAt).toLocaleDateString('ko-KR')}</div>
               </div>
 
@@ -177,20 +179,20 @@ export default function ProfilePage() {
                     <polyline points="16 17 21 12 16 7" />
                     <line x1="21" y1="12" x2="9" y2="12" />
                   </svg>
-                  로그아웃
+                  {t("logout")}
                 </Button>
               </div>
               
               {profile.lastLoginAt && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">마지막 로그인</div>
+                  <div className="text-sm font-medium text-gray-500">{t("lastLoginAt")}</div>
                   <div className="text-lg">{new Date(profile.lastLoginAt).toLocaleDateString('ko-KR')}</div>
                 </div>
               )}
               
               {profile.preferences && (
                 <div className="space-y-2">
-                  <div className="text-sm font-medium text-gray-500">설정</div>
+                  <div className="text-sm font-medium text-gray-500">{t("settings")}</div>
                   <div className="text-lg">
                     <div>언어: {profile.preferences.language}</div>
                     <div>테마: {profile.preferences.theme === 'light' ? '라이트' : '다크'}</div>

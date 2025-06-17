@@ -22,24 +22,15 @@ export async function middleware(request: NextRequest) {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            console.log('response status:', response.status);
-            
             const data = await response.json();
-            console.log('response data:', data);
 
             // 인증되지 않은 경우 로그인 페이지로 리다이렉트
             if (!response.ok) {
-                console.log('Authentication failed, redirecting to login');
                 const loginUrl = new URL('/login', request.url);
                 return NextResponse.redirect(loginUrl);
             }
 
-            // 인증 성공 시 다음 미들웨어로 진행
-            console.log('Authentication successful, proceeding to protected route');
-            return NextResponse.next();
-
         } catch (error) {
-            console.error('Middleware error:', error);
             // 에러 발생 시 로그인 페이지로 리다이렉트
             const loginUrl = new URL('/login', request.url);
             return NextResponse.redirect(loginUrl);

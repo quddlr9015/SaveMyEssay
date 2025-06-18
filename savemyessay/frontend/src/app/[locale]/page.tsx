@@ -1,9 +1,9 @@
 "use client";
 
 import {useTranslations} from 'next-intl';
-import { Link } from '../../i18n/routing';
-import { useRouter } from "@/i18n/routing";
+import { Link, useRouter } from '@/i18n/routing';
 import { useEffect } from "react";
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function Home() {
     const router = useRouter();
@@ -18,11 +18,11 @@ export default function Home() {
         }
     }, [router]);
     
-      const handleLogoClick = () => {
+    const handleLogoClick = () => {
         router.push('/dashboard');
-      };
-      
-      return (
+    };
+    
+    return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
           {/* 네비게이션 바 */}
           <nav className="bg-white shadow-sm">
@@ -36,13 +36,14 @@ export default function Home() {
                     SaveMyEssay
                   </h1>
                 </div>
-                <div>
+                <div className="flex items-center gap-4">
                   <Link
                     href="/login"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   >
                     {t('start')}
                   </Link>
+                  <LanguageSelector />
                 </div>
               </div>
             </div>

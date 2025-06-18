@@ -1,9 +1,8 @@
 // components/LayoutWrapper.tsx
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/routing';
 import { NavigationBar } from '@/components/NavigationBar';
-import { LanguageSelector } from '@/components/LanguageSelector';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,7 +14,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <>
       {!isHomePage && <NavigationBar />}
       <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
-      <LanguageSelector />
     </>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname} from "@/i18n/routing";
 import { useEffect, useState } from "react";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export function NavigationBar() {
   const pathname = usePathname();
@@ -99,6 +99,7 @@ export function NavigationBar() {
             >
               {t("profile")}
             </Link>
+            <LanguageSelector />
           </div>
         </div>
       </div>

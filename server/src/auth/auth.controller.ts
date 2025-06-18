@@ -65,7 +65,7 @@ export default class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
         const result = await this.authService.googleLogin(req);
-        Logger.debug("Google Login successed: ", result);
+        const locale = req.cookies.NEXT_LOCALE || 'en'; // locale 파라미터가 없으면 기본값은 en
 
         // 새로운 사용자인 경우 회원가입 페이지로 리다이렉트
         if (result.isNewUser) {
@@ -73,7 +73,7 @@ export default class AuthController {
                 email: result.user.email,
                 name: result.user.name,
             });
-            return res.redirect(`https://www.savemyessay.com/auth/signup?${params.toString()}`);
+            return res.redirect(`https://www.savemyessay.com/${locale}/auth/signup?${params.toString()}`);
         }
 
         // 기존 사용자인 경우 대시보드로 리다이렉트
@@ -92,7 +92,7 @@ export default class AuthController {
         // 토큰을 URL 파라미터로도 전달
         const params = new URLSearchParams();
         params.append('token', result.accessToken);
-        res.redirect(`https://www.savemyessay.com/dashboard?${params.toString()}`);
+        res.redirect(`https://www.savemyessay.com/${locale}/dashboard?${params.toString()}`);
     }
 
     @Post('/google/signup')

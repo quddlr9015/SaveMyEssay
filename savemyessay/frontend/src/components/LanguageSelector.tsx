@@ -37,28 +37,24 @@ export function LanguageSelector() {
   };
 
   return (
-    <div className="sticky bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-1">
-      <div className="container mx-auto flex justify-center">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="flex items-center gap-1 h-7 px-2 text-xs min-w-0 w-auto">
-              <Globe className="h-3 w-3" />
-              <span className="truncate max-w-[40px]">{currentLanguage?.label}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="w-[120px] bg-white border shadow-lg">
-            {languageOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => handleLanguageChange(option.value)}
-                className="cursor-pointer hover:bg-gray-100 text-xs py-1"
-              >
-                {option.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="flex items-center gap-1 h-8 px-2 text-sm">
+          <Globe className="h-4 w-4" />
+          <span className="truncate max-w-[40px]">{currentLanguage?.label}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[120px] bg-white border shadow-lg">
+        {languageOptions.map((option) => (
+          <DropdownMenuItem
+            key={option.value}
+            onClick={() => handleLanguageChange(option.value)}
+            className="cursor-pointer hover:bg-gray-100 text-sm py-1.5"
+          >
+            {option.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 } 

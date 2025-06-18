@@ -65,6 +65,7 @@ export default class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
         const result = await this.authService.googleLogin(req);
+        console.log("req", req);
         const locale = req.cookies.NEXT_LOCALE || 'en'; // locale 파라미터가 없으면 기본값은 en
 
         // 새로운 사용자인 경우 회원가입 페이지로 리다이렉트

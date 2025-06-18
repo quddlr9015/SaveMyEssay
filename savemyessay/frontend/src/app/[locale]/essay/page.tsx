@@ -5,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/routing';
 import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
+import { useTranslations } from 'next-intl';
 
 const TEST_TYPES = {
   'TOEFL': ['Academic Discussion', 'Integrated'],
@@ -60,7 +61,8 @@ export default function EssayPage() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [defaultTest, setDefaultTest] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
-
+  const t = useTranslations("EssayPage");
+  
   // 사용자의 목표 점수 설정 여부 확인
   useEffect(() => {
     const checkTargetScore = async () => {
@@ -128,7 +130,7 @@ export default function EssayPage() {
 
   const handleSubmit = async () => {
     if (!selectedTest || !selectedType || !essay) {
-      alert('모든 필드를 입력해주세요.');
+      alert(t("fillAllFields"));
       return;
     }
 
@@ -136,7 +138,7 @@ export default function EssayPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('로그인이 필요합니다.');
+        alert(t("loginRequired"));
         router.push('/login');
         return;
       }
@@ -158,7 +160,7 @@ export default function EssayPage() {
       });
 
       if (!response.ok) {
-        throw new Error('에세이 제출에 실패했습니다.');
+        throw new Error(t("submitFailed"));
       }
 
       const result = await response.json();
@@ -166,7 +168,7 @@ export default function EssayPage() {
       router.push(`/essay/feedback?id=${result.id}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
-      alert('에세이 제출 중 오류가 발생했습니다.');
+      alert(t("submitError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -193,14 +195,14 @@ export default function EssayPage() {
 
   const handleScoreSubmit = async () => {
     if (!targetScore) {
-      alert('목표 점수를 입력해주세요.');
+      alert(t("targetScoreInput"));
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('로그인이 필요합니다.');
+        alert(t("loginRequired"));
         router.push('/login');
         return;
       }
@@ -218,25 +220,25 @@ export default function EssayPage() {
       });
 
       if (!response.ok) {
-        throw new Error('목표 점수 저장에 실패했습니다.');
+        throw new Error(t("targetScoreSaveFailed"));
       }
 
       // 성공적으로 저장되면 해당 시험의 writing 페이지로 이동
       router.push(`/essay/${selectedTest.toLowerCase()}`);
     } catch (error) {
       console.error('Error setting target score:', error);
-      alert('목표 점수 저장 중 오류가 발생했습니다.');
+      alert(t("targetScoreSaveError"));
     }
   };
 
   const getScoreRange = (test: string) => {
     switch (test) {
       case 'TOEFL':
-        return '0-30 (Writing 섹션)';
+        return '0-30 (Writing {t("section")})';
       case 'TOEIC':
-        return '0-200 (Writing 섹션)';
+        return '0-200 (Writing {t("section")})';
       case 'SAT':
-        return '2-8 (Writing 점수)';
+        return '2-8 (Writing {t("score")})';
       default:
         return '';
     }
@@ -245,13 +247,13 @@ export default function EssayPage() {
   const getScorePlaceholder = (test: string) => {
     switch (test) {
       case 'TOEFL':
-        return '예: 25';
+        return `${t("example")} 25`;
       case 'TOEIC':
-        return '예: 180';
+        return `${t("example")} 180`;
       case 'SAT':
-        return '예: 6';
+        return `${t("example")} 6`;
       default:
-        return '목표 점수 입력';
+        return t("inputTargetScore");
     }
   };
 
@@ -277,7 +279,7 @@ export default function EssayPage() {
             transition={{ delay: 0.2 }}
             className="text-4xl font-bold text-gray-900 tracking-tight mb-12"
           >
-            어떤 시험을 준비하시나요?
+            {t("testType")}
           </motion.h1>
           
           <motion.div
@@ -313,7 +315,7 @@ export default function EssayPage() {
             transition={{ delay: 0.2 }}
             className="text-4xl font-bold text-gray-900 tracking-tight mb-12"
           >
-            목표 점수를 입력해주세요
+            {t("targetScore")}
           </motion.h1>
 
           <motion.div
@@ -323,7 +325,7 @@ export default function EssayPage() {
             className="space-y-6"
           >
             <div className="text-lg text-gray-600 mb-8">
-              {selectedTest} 시험의 점수 범위: {getScoreRange(selectedTest)}
+              {selectedTest} {t("scoreRange")}: {getScoreRange(selectedTest)}
             </div>
             
             <div className="flex flex-col items-center space-y-4">
@@ -341,13 +343,13 @@ export default function EssayPage() {
                   variant="outline"
                   className="px-8 py-3"
                 >
-                  뒤로
+                  {t("back")}
                 </Button>
                 <Button
                   onClick={handleScoreSubmit}
                   className="px-8 py-3 bg-gray-900 text-white hover:bg-gray-800"
                 >
-                  확인
+                  {t("check")}
                 </Button>
               </div>
             </div>

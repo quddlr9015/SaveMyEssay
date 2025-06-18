@@ -1,13 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname} from "@/i18n/routing";
 import { useEffect, useState } from "react";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 export function NavigationBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const t = useTranslations("NavigationBar");
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
@@ -50,7 +52,7 @@ export function NavigationBar() {
             >
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold">SaveMyEssay</h1>
-                <span className="text-sm text-gray-500">영어 Writing 시험 채점 서비스</span>
+                <span className="text-sm text-gray-500">{t("description")}</span>
               </div>
             </Link>
           </div>
@@ -63,7 +65,7 @@ export function NavigationBar() {
                   : "text-gray-700 hover:text-blue-600"
               }`}
             >
-              대시보드
+              {t("dashboard")}
             </Link>
             <Link
               href="/essay"
@@ -73,7 +75,7 @@ export function NavigationBar() {
                   : "text-gray-700 hover:text-blue-600"
               }`}
             >
-              에세이
+              {t("Essay")}
             </Link>
             {isAdmin && (
               <Link
@@ -95,8 +97,9 @@ export function NavigationBar() {
                   : "text-gray-700 hover:text-blue-600"
               }`}
             >
-              프로필
+              {t("profile")}
             </Link>
+            <LanguageSelector />
           </div>
         </div>
       </div>

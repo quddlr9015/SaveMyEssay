@@ -1,11 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { API_ENDPOINTS, getApiUrl } from "@/utils/api";
+import { useTranslations } from "next-intl";
 
 export default function Login() {
+  const t = useTranslations("LoginPage");
   const router = useRouter();
+  const locale = useLocale();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -45,7 +49,7 @@ export default function Login() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
+          <p className="mt-4 text-gray-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -60,10 +64,10 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-2xl shadow-xl">
         <div className="text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            환영합니다
+            {t("title")}
           </h2>
           <p className="text-gray-600 mb-8">
-            에세이 채점 서비스를 이용하려면 로그인해주세요
+            {t("description")}
           </p>
         </div>
         <div className="space-y-6">
@@ -89,7 +93,7 @@ export default function Login() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Google 계정으로 로그인
+            {t("googleLoginButton")}
           </button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -97,20 +101,20 @@ export default function Login() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 bg-white text-gray-500">
-                또는
+                {t("or")}
               </span>
             </div>
           </div>
           <p className="text-center text-sm text-gray-600">
-            로그인함으로써 서비스의{' '}
+            {t("termsOfService")}{' '}
             <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-              이용약관
+              {t("termsOfServiceLink")}
             </a>
-            {' '}및{' '}
+            {' '}{t("privacyPolicy")}{' '}
             <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-              개인정보 처리방침
+              {t("privacyPolicyLink")}
             </a>
-            에 동의하게 됩니다.
+            {t("agree")}
           </p>
         </div>
       </div>

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { getApiUrl } from '@/utils/api';
+import { useTranslations } from 'next-intl';
 
 interface EssayHistory {
   id: number;
@@ -67,6 +68,7 @@ function DashboardContent() {
   const [selectedTest, setSelectedTest] = useState<string>('');
   const [statistics, setStatistics] = useState<Statistics>({});
   const [targetScore, setTargetScore] = useState<TargetScore | null>(null);
+  const t = useTranslations("DashboardPage");
 
   useEffect(() => {
     // URL에서 토큰 가져오기
@@ -262,16 +264,16 @@ function DashboardContent() {
       {targetScore && targetScore.testType && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>현재 목표</CardTitle>
+            <CardTitle>{t("goal")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-500">시험 종류</p>
+                <p className="text-sm text-gray-500">{t("testType")}</p>
                 <p className="text-xl font-semibold">{targetScore.testType}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">목표 점수</p>
+                <p className="text-sm text-gray-500">{t("targetScore")}</p>
                 <p className="text-xl font-semibold">{targetScore.targetScore}</p>
               </div>
             </div>
@@ -283,7 +285,7 @@ function DashboardContent() {
       <div className="flex gap-4">
         <Select value={selectedTest} onValueChange={setSelectedTest}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="시험 종류 선택" />
+            <SelectValue placeholder={t("testType")} />
           </SelectTrigger>
           <SelectContent>
             {Object.keys(statistics).map((testName) => (
@@ -297,7 +299,7 @@ function DashboardContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>전체 에세이 수</CardTitle>
+            <CardTitle>{t("totalEssays")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{statistics[selectedTest]?.totalEssays || 0}</p>
@@ -305,7 +307,7 @@ function DashboardContent() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>평균 점수</CardTitle>
+            <CardTitle>{t("averageScore")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
@@ -316,7 +318,7 @@ function DashboardContent() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>최근 작성일</CardTitle>
+            <CardTitle>{t("lastEssayDate")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{statistics[selectedTest]?.lastEssayDate || '-'}</p>
@@ -328,7 +330,7 @@ function DashboardContent() {
       {statistics[selectedTest]?.scoreTrend && statistics[selectedTest].scoreTrend.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>점수 추이</CardTitle>
+            <CardTitle>{t("scoreTrend")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -337,22 +339,22 @@ function DashboardContent() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis 
                     dataKey="date" 
-                    label={{ value: '날짜', position: 'insideBottom', offset: -5 }}
+                    label={{ value: t("date"), position: 'insideBottom', offset: -5 }}
                   />
                   <YAxis 
-                    label={{ value: '점수', angle: -90, position: 'insideLeft' }}
+                    label={{ value: t("score"), angle: -90, position: 'insideLeft' }}
                     domain={[0, TEST_MAX_SCORES[selectedTest] || 100]}
                   />
                   <Tooltip 
                     formatter={(value: number, name: string) => [
-                      `${value}점`,
+                      `${value}${t("dot")}`,
                       name
                     ]}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="score" 
-                    name={`${selectedTest} (만점: ${TEST_MAX_SCORES[selectedTest]}점)`}
+                    name={`${selectedTest} (${t("totalScore")}: ${TEST_MAX_SCORES[selectedTest]})`}
                     stroke="#8884d8" 
                     strokeWidth={2}
                     dot={{ r: 4 }}
@@ -371,7 +373,7 @@ function DashboardContent() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
-              placeholder="에세이 검색..."
+              placeholder={t("searchPlaceholder")}
               value={searchTerm}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -381,11 +383,11 @@ function DashboardContent() {
         <div className="flex gap-2">
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="정렬 기준" />
+              <SelectValue placeholder={t("sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="date">날짜</SelectItem>
-              <SelectItem value="score">점수</SelectItem>
+              <SelectItem value="date">{t("date")}</SelectItem>
+              <SelectItem value="score">{t("score")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -416,7 +418,7 @@ function DashboardContent() {
                           ? "secondary" 
                           : "destructive"}
                     >
-                      {history.score}점
+                      {history.score} {t("dot")}
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-500 line-clamp-1">
@@ -431,28 +433,28 @@ function DashboardContent() {
               <Accordion type="single" collapsible className="w-full mt-4">
                 <AccordionItem value="details" className="border-none">
                   <AccordionTrigger className="text-sm text-gray-500 hover:text-gray-700">
-                    상세 내용 보기
+                    {t("viewDetails")}
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-6 pt-4">
                       <div>
-                        <h3 className="font-semibold mb-2">문제</h3>
+                        <h3 className="font-semibold mb-2">{t("question")}</h3>
                         <p className="whitespace-pre-wrap text-sm">{history.question}</p>
                       </div>
                       
                       <div>
-                        <h3 className="font-semibold mb-2">에세이 내용</h3>
+                        <h3 className="font-semibold mb-2">{t("essay")}</h3>
                         <p className="whitespace-pre-wrap text-sm">{history.essay}</p>
                       </div>
 
                       <div>
-                        <h3 className="font-semibold mb-2">전체 피드백</h3>
+                        <h3 className="font-semibold mb-2">{t("totalFeedback")}</h3>
                         <p className="whitespace-pre-wrap text-sm">{history.feedback}</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h3 className="font-semibold mb-2">문법 피드백</h3>
+                          <h3 className="font-semibold mb-2">{t("grammarFeedback")}</h3>
                           <ul className="list-disc pl-5 space-y-1 text-sm">
                             {history.grammar.map((item, index) => (
                               <li key={index}>{item}</li>
@@ -460,7 +462,7 @@ function DashboardContent() {
                           </ul>
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-2">어휘 피드백</h3>
+                          <h3 className="font-semibold mb-2">{t("vocabularyFeedback")}</h3>
                           <ul className="list-disc pl-5 space-y-1 text-sm">
                             {history.vocabulary.map((item, index) => (
                               <li key={index}>{item}</li>
@@ -468,7 +470,7 @@ function DashboardContent() {
                           </ul>
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-2">내용 피드백</h3>
+                          <h3 className="font-semibold mb-2">{t("contentFeedback")}</h3>
                           <ul className="list-disc pl-5 space-y-1 text-sm">
                             {history.content.map((item, index) => (
                               <li key={index}>{item}</li>
@@ -476,7 +478,7 @@ function DashboardContent() {
                           </ul>
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-2">구성 피드백</h3>
+                          <h3 className="font-semibold mb-2">{t("organizationFeedback")}</h3>
                           <ul className="list-disc pl-5 space-y-1 text-sm">
                             {history.organization.map((item, index) => (
                               <li key={index}>{item}</li>

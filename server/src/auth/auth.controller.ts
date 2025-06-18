@@ -50,7 +50,6 @@ export default class AuthController {
     // 2. 이 과정에서 passport-google-oauth20 전략이 사용되며, google.strategy.ts에 정의된 설정(clientID, clientSecret 등)을 사용합니다.
     // 3. 사용자가 구글에서 인증을 완료하면 callbackURL로 지정된 '/google/callback' 엔드포인트로 리다이렉트됩니다.
     @Get('/google/login')
-    @UseGuards(AuthGuard('google'))
     async googleAuth(@Req() req, @Res() res: Response) {
         const locale = req.query.state || 'en';
         // passport.authenticate에 state 전달

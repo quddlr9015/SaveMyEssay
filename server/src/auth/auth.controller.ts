@@ -54,6 +54,7 @@ export default class AuthController {
     async googleAuth(@Req() req, @Res() res: Response) {
         const locale = req.query.state || 'en';
         // passport.authenticate에 state 전달
+        Logger.log("google start locale", locale);
         return passport.authenticate('google', {
             scope: ['profile', 'email'],
             state: locale,

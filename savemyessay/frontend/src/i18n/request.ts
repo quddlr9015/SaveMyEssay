@@ -6,7 +6,7 @@ export default getRequestConfig(async ({requestLocale}) => {
   let locale = await requestLocale;
  
   // 유효한 locale이 사용되었는지 확인합니다
-  if (!locale || !routing.locales.includes(locale as any)) {
+  if (!locale || !routing.locales.includes(locale as 'en' | 'ko')) {
     locale = routing.defaultLocale;
   }
  

@@ -1,12 +1,13 @@
 "use client";
 
 import { getApiUrl } from "@/utils/api";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function SignIn() {
   const t = useTranslations("SignInPage");
+  const locale = useLocale();
   const handleGoogleSignIn = async () => {
-    window.location.href = `${getApiUrl()}/auth/google/login`;
+    window.location.href = `${getApiUrl()}/auth/google/login?state=${locale}`;
   };
 
   return (

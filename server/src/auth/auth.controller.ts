@@ -5,6 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { GoogleSignUpDto } from './dto/google-signup.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import * as passport from 'passport';
 
 @Controller('auth')
 export default class AuthController {
@@ -50,10 +51,13 @@ export default class AuthController {
     // 3. 사용자가 구글에서 인증을 완료하면 callbackURL로 지정된 '/google/callback' 엔드포인트로 리다이렉트됩니다.
     @Get('/google/login')
     @UseGuards(AuthGuard('google'))
-    async googleAuth() {
-        Logger.log("Google social login start");
-        // 실제 구현 코드는 없으며, AuthGuard('google')가 자동으로 구글 로그인 페이지로 리다이렉트 처리를 합니다.
-        // 이 메서드는 호출되지 않습니다.
+    async googleAuth(@Req() req, @Res() res: Response) {
+        const locale = req.query.state || 'en';
+        // passport.authenticate에 state 전달
+        return passport.authenticate('google', {
+            scope: ['profile', 'email'],
+            state: locale,
+        })(req, res);
     }
 
     // 구글 인증 후 콜백 처리
@@ -64,9 +68,9 @@ export default class AuthController {
     @Get('/google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
+        const locale = req.query.state || 'en';
         const result = await this.authService.googleLogin(req);
-        console.log("req", req);
-        const locale = req.cookies.NEXT_LOCALE || 'en'; // locale 파라미터가 없으면 기본값은 en
+        Logger.log("req", req);
 
         // 새로운 사용자인 경우 회원가입 페이지로 리다이렉트
         if (result.isNewUser) {

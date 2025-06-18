@@ -56,7 +56,7 @@ export default function Login() {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = `${getApiUrl()}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}`;
+    window.location.href = `${getApiUrl()}${API_ENDPOINTS.AUTH.GOOGLE_LOGIN}?state=${locale}`;
   };
 
   return (

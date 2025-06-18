@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { useLanguage } from '@/hooks/useLanguage';
 import { fetchApi } from '@/utils/api';
 import { Howl } from 'howler';
 import { Slider } from '@/components/ui/slider';
@@ -41,7 +40,6 @@ export default function EssayForm({ examType }: EssayFormProps) {
   const [essay, setEssay] = useState('');
   const [deleLevel, setDeleLevel] = useState<DeleLevel | ''>('');
   const [isLoading, setIsLoading] = useState(false);
-  const { language } = useLanguage();
   const [error, setError] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuestionListItem[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
@@ -123,7 +121,6 @@ export default function EssayForm({ examType }: EssayFormProps) {
       const data = await fetchApi('/essay_grader/submit', {
         method: 'POST',
         body: JSON.stringify({
-          lang: language,
           testName: examType,
           testLevel: deleLevel,
           essayContents: essay,

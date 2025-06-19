@@ -33,7 +33,6 @@ export class SaveMyEssayService {
             const histories = await this.essayGradeRepository.find({
                 where: { userId: user.id },
                 order: { createdAt: 'DESC' },
-                relations: ['user']
             });
             Logger.log(`[EssayGrader Service] Found ${histories.length} essays for user ${user.id}`);
             return histories;
@@ -99,7 +98,7 @@ export class SaveMyEssayService {
                 try {
                     // Save to database
                     const essayGrade = this.essayGradeRepository.create({
-                        user: { id: user.id },
+                        userId: user.id,
                         testName,
                         testLevel,
                         question,

@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
 
 @Entity()
 export class EssayHistory {
@@ -39,10 +38,7 @@ export class EssayHistory {
     @CreateDateColumn()
     createdAt: Date;
 
-    @ManyToOne(type => User, user => user.essays)
-    @JoinColumn({ name: 'userId' })
-    user: User;
-
+    @Index() // enables fast querying by user id
     @Column({ nullable: false })
     userId: string;
 } 

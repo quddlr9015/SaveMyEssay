@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from '@/users/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index } from 'typeorm';
 
 @Entity()
 export class Essay {
@@ -26,10 +25,7 @@ export class Essay {
     @CreateDateColumn()
     createdAt: Date;
 
-    @ManyToOne(() => User, user => user.essays)
-    @JoinColumn({ name: 'userId' })
-    user: User;
-
+    @Index()
     @Column()
     userId: string;
 } 

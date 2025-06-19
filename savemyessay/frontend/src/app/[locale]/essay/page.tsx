@@ -234,11 +234,11 @@ export default function EssayPage() {
   const getScoreRange = (test: string) => {
     switch (test) {
       case 'TOEFL':
-        return '0-30 (Writing {t("section")})';
+        return `0-30 (Writing ${t("section")})`;
       case 'TOEIC':
-        return '0-200 (Writing {t("section")})';
+        return `0-200 (Writing ${t("section")})`;
       case 'SAT':
-        return '2-8 (Writing {t("score")})';
+        return `2-8 (Writing ${t("score")})`;
       default:
         return '';
     }

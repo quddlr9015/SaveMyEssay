@@ -168,5 +168,8 @@
         "vocabularyFeedback": "Vocabulary Feedback",
         "contentFeedback": "Content Feedback",
         "organizationFeedback": "Organization Feedback"
+    },
+    "ContactPage": {
+        "description": "For inquiries, please contact:"
     }
 } 

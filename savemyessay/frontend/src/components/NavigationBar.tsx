@@ -42,37 +42,51 @@ export function NavigationBar() {
   }
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className="bg-white/80 shadow-md backdrop-blur-md sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center space-x-4">
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <span className="inline-block animate-bounce">
+              <svg
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="12" cy="12" r="10" fill="#6366F1" />
+                <path
+                  d="M8 13h8M8 16h5"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
             <Link
               href="/dashboard"
-              className="text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+              className="text-2xl font-extrabold text-gray-900 tracking-tight hover:text-indigo-600 transition-colors cursor-pointer"
             >
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold">SaveMyEssay</h1>
-                <span className="text-sm text-gray-500">{t("description")}</span>
-              </div>
+              SaveMyEssay
             </Link>
           </div>
           <div className="flex items-center space-x-4">
             <Link
               href="/dashboard"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 pathname === "/dashboard"
-                  ? "text-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
+                  ? "text-indigo-600"
+                  : "text-gray-700 hover:text-indigo-600"
               }`}
             >
               {t("dashboard")}
             </Link>
             <Link
               href="/essay"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 pathname === "/essay"
-                  ? "text-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
+                  ? "text-indigo-600"
+                  : "text-gray-700 hover:text-indigo-600"
               }`}
             >
               {t("Essay")}
@@ -80,10 +94,10 @@ export function NavigationBar() {
             {isAdmin && (
               <Link
                 href="/admin/questions"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   pathname === "/admin/questions"
-                    ? "text-blue-600"
-                    : "text-gray-700 hover:text-blue-600"
+                    ? "text-indigo-600"
+                    : "text-gray-700 hover:text-indigo-600"
                 }`}
               >
                 관리자
@@ -91,10 +105,10 @@ export function NavigationBar() {
             )}
             <Link
               href="/profile"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 pathname === "/profile"
-                  ? "text-blue-600"
-                  : "text-gray-700 hover:text-blue-600"
+                  ? "text-indigo-600"
+                  : "text-gray-700 hover:text-indigo-600"
               }`}
             >
               {t("profile")}

@@ -228,8 +228,8 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -257,242 +257,252 @@ function DashboardContent() {
       };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">SaveMyEssay</h1>
-      
-      {/* 목표 점수 카드 */}
-      {targetScore && targetScore.testType && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>{t("goal")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{t("testType")}</p>
-                <p className="text-xl font-semibold">{targetScore.testType}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{t("targetScore")}</p>
-                <p className="text-xl font-semibold">{targetScore.targetScore}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 시험 종류 선택 */}
-      <div className="flex gap-4">
-        <Select value={selectedTest} onValueChange={setSelectedTest}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder={t("testType")} />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.keys(statistics).map((testName) => (
-              <SelectItem key={testName} value={testName}>{testName}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("totalEssays")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{statistics[selectedTest]?.totalEssays || 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("averageScore")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {statistics[selectedTest]?.averageScore ? statistics[selectedTest].averageScore.toFixed(1) : '0'}
-              {` / ${TEST_MAX_SCORES[selectedTest] || 100}`}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("lastEssayDate")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{statistics[selectedTest]?.lastEssayDate || '-'}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 점수 추이 차트 */}
-      {statistics[selectedTest]?.scoreTrend && statistics[selectedTest].scoreTrend.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("scoreTrend")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={statistics[selectedTest].scoreTrend}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
-                    label={{ value: t("date"), position: 'insideBottom', offset: -5 }}
-                  />
-                  <YAxis 
-                    label={{ value: t("score"), angle: -90, position: 'insideLeft' }}
-                    domain={[0, TEST_MAX_SCORES[selectedTest] || 100]}
-                  />
-                  <Tooltip 
-                    formatter={(value: number, name: string) => [
-                      `${value}${t("dot")}`,
-                      name
-                    ]}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    name={`${selectedTest} (${t("totalScore")}: ${TEST_MAX_SCORES[selectedTest]})`}
-                    stroke="#8884d8" 
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 검색 및 필터 */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder={t("searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={t("sortBy")} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">{t("date")}</SelectItem>
-              <SelectItem value="score">{t("score")}</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-          >
-            <ArrowUpDown className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* 에세이 목록 */}
-      <div className="space-y-4">
-        {filteredHistories.map((history) => (
-          <Card key={history.id} className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">
-                      {history.testName} - {history.testLevel}
-                    </h2>
-                    <Badge
-                      variant={history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.8 
-                        ? "default" 
-                        : history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.6 
-                          ? "secondary" 
-                          : "destructive"}
-                    >
-                      {history.score} {t("dot")}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-500 line-clamp-1">
-                    {history.question}
-                  </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 space-y-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">SaveMyEssay</h1>
+        
+        {/* 목표 점수 카드 */}
+        {targetScore && targetScore.testType && (
+          <Card className="mb-6 bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-gray-900">{t("goal")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">{t("testType")}</p>
+                  <p className="text-xl font-semibold text-indigo-600">{targetScore.testType}</p>
                 </div>
-                <p className="text-sm text-gray-500">
-                  {new Date(history.createdAt).toLocaleDateString()}
-                </p>
+                <div>
+                  <p className="text-sm text-gray-500">{t("targetScore")}</p>
+                  <p className="text-xl font-semibold text-indigo-600">{targetScore.targetScore}</p>
+                </div>
               </div>
-
-              <Accordion type="single" collapsible className="w-full mt-4">
-                <AccordionItem value="details" className="border-none">
-                  <AccordionTrigger className="text-sm text-gray-500 hover:text-gray-700">
-                    {t("viewDetails")}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-6 pt-4">
-                      <div>
-                        <h3 className="font-semibold mb-2">{t("question")}</h3>
-                        <p className="whitespace-pre-wrap text-sm">{history.question}</p>
-                      </div>
-                      
-                      <div>
-                        <h3 className="font-semibold mb-2">{t("essay")}</h3>
-                        <p className="whitespace-pre-wrap text-sm">{history.essay}</p>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold mb-2">{t("totalFeedback")}</h3>
-                        <p className="whitespace-pre-wrap text-sm">{history.feedback}</p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <h3 className="font-semibold mb-2">{t("grammarFeedback")}</h3>
-                          <ul className="list-disc pl-5 space-y-1 text-sm">
-                            {history.grammar.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-2">{t("vocabularyFeedback")}</h3>
-                          <ul className="list-disc pl-5 space-y-1 text-sm">
-                            {history.vocabulary.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-2">{t("contentFeedback")}</h3>
-                          <ul className="list-disc pl-5 space-y-1 text-sm">
-                            {history.content.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-2">{t("organizationFeedback")}</h3>
-                          <ul className="list-disc pl-5 space-y-1 text-sm">
-                            {history.organization.map((item, index) => (
-                              <li key={index}>{item}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
             </CardContent>
           </Card>
-        ))}
+        )}
+
+        {/* 시험 종류 선택 */}
+        <div className="flex gap-4 mb-6">
+          <Select value={selectedTest} onValueChange={setSelectedTest}>
+            <SelectTrigger className="w-[180px] bg-white/80 backdrop-blur-md border-none shadow-md">
+              <SelectValue placeholder={t("testType")} />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.keys(statistics).map((testName) => (
+                <SelectItem key={testName} value={testName}>{testName}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-gray-900">{t("totalEssays")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-indigo-600">{statistics[selectedTest]?.totalEssays || 0}</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-gray-900">{t("averageScore")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-indigo-600">
+                {statistics[selectedTest]?.averageScore ? statistics[selectedTest].averageScore.toFixed(1) : '0'}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-gray-900">{t("lastEssayDate")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-indigo-600">{statistics[selectedTest]?.lastEssayDate || '-'}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 점수 추이 차트 */}
+        {statistics[selectedTest]?.scoreTrend && statistics[selectedTest].scoreTrend.length > 0 && (
+          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300 mb-6">
+            <CardHeader>
+              <CardTitle className="text-gray-900">{t("scoreTrend")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={statistics[selectedTest].scoreTrend}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      label={{ value: t("date"), position: 'insideBottom', offset: -5 }}
+                      stroke="#4b5563"
+                    />
+                    <YAxis 
+                      label={{ value: t("score"), angle: -90, position: 'insideLeft' }}
+                      domain={[0, TEST_MAX_SCORES[selectedTest] || 100]}
+                      stroke="#4b5563"
+                    />
+                    <Tooltip 
+                      formatter={(value: number, name: string) => [
+                        `${value}${t("dot")}`,
+                        name
+                      ]}
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="score" 
+                      name={`${selectedTest} (${t("totalScore")}: ${TEST_MAX_SCORES[selectedTest]})`}
+                      stroke="#6366f1" 
+                      strokeWidth={2}
+                      dot={{ r: 4, fill: '#6366f1' }}
+                      activeDot={{ r: 6, fill: '#4f46e5' }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* 검색 및 필터 */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-600 z-10" />
+              <Input
+                placeholder={t("searchPlaceholder")}
+                value={searchTerm}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-white/80 backdrop-blur-md border-none shadow-md"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px] bg-white/80 backdrop-blur-md border-none shadow-md">
+                <SelectValue placeholder={t("sortBy")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">{t("date")}</SelectItem>
+                <SelectItem value="score">{t("score")}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+              className="bg-white/80 backdrop-blur-md border-none shadow-md"
+            >
+              <ArrowUpDown className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* 에세이 목록 */}
+        <div className="space-y-4">
+          {filteredHistories.map((history) => (
+            <Card key={history.id} className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-semibold text-gray-900">
+                        {history.testName} - {history.testLevel}
+                      </h2>
+                      <Badge
+                        variant={history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.8 
+                          ? "default" 
+                          : history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.6 
+                            ? "secondary" 
+                            : "destructive"}
+                      >
+                        {history.score} {t("dot")}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-500 line-clamp-1">
+                      {history.question}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {new Date(history.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <Accordion type="single" collapsible className="w-full mt-4">
+                  <AccordionItem value="details" className="border-none">
+                    <AccordionTrigger className="text-sm text-gray-500 hover:text-indigo-600 transition-colors">
+                      {t("viewDetails")}
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="space-y-6 pt-4">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-2">{t("question")}</h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.question}</p>
+                        </div>
+                        
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-2">{t("essay")}</h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.essay}</p>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-2">{t("totalFeedback")}</h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.feedback}</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">{t("grammarFeedback")}</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                              {history.grammar.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">{t("vocabularyFeedback")}</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                              {history.vocabulary.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">{t("contentFeedback")}</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                              {history.content.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-2">{t("organizationFeedback")}</h3>
+                            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                              {history.organization.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

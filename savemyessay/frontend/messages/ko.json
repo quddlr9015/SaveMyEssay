@@ -169,5 +169,8 @@
         "vocabularyFeedback": "어휘 피드백",
         "contentFeedback": "내용 피드백",
         "organizationFeedback": "구성 피드백"
+    },
+    "ContactPage": {
+        "description": "문의가 있으신가요? 아래 이메일로 문의해주세요."
     }
 } 

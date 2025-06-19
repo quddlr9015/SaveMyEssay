@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Essay } from '../../saveMyEssay/entities/essay.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum AuthProvider {
     LOCAL = 'local',
@@ -41,9 +40,6 @@ export class User {
 
     @Column({ nullable: true })
     lastLoginAt: Date;
-
-    @OneToMany(type => Essay, essay => essay.user, { eager: true })
-    essays: Essay[];
 
     // 소셜 로그인 관련 필드
     @Column({

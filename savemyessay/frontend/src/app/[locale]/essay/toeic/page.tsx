@@ -9,7 +9,7 @@ import { useRouter } from '@/i18n/routing';
 import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 const TEST_TYPES = ['Basic', 'Advanced'];
 const WORD_LIMITS = {
@@ -36,6 +36,7 @@ export default function TOEICEssayPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const t = useTranslations("EssayPage");
+  const locale = useLocale();
 
   // 자동 저장 기능
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function TOEICEssayPage() {
           testName: 'TOEIC',
           testLevel: selectedType,
           essayContents: essay,
-          lang: 'en',
+          lang: locale,
           timeSpent: timeElapsed
         }),
       });

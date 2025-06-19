@@ -3,6 +3,7 @@
 
 import { usePathname } from '@/i18n/routing';
 import { NavigationBar } from '@/components/NavigationBar';
+import Footer from '@/components/Footer';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,6 +15,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     <>
       {!isHomePage && <NavigationBar />}
       <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+      <Footer />
     </>
   );
 }

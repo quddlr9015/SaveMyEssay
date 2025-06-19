@@ -206,17 +206,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      {/* 푸터 */}
-      <footer className="bg-gradient-to-r from-indigo-100 to-pink-100">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-base text-gray-500">
-              © 2024 에세이 채점 시스템. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

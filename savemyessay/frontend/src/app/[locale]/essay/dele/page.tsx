@@ -9,7 +9,7 @@ import { useRouter } from '@/i18n/routing';
 import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 const TEST_TYPES = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const WORD_LIMITS = {
@@ -48,7 +48,7 @@ export default function DEEssayPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const t = useTranslations("EssayPage");
-
+  const locale = useLocale();
   // 자동 저장 기능
   useEffect(() => {
     const autoSave = () => {
@@ -105,7 +105,7 @@ export default function DEEssayPage() {
           testName: 'DELE',
           testLevel: selectedType,
           essayContents: essay,
-          lang: 'es',
+          lang: locale,
           timeSpent: timeElapsed
         }),
       });

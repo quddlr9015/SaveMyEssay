@@ -11,7 +11,7 @@ import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
 import { Howl } from 'howler';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 const TEST_TYPES = ['ACADEMIC_DISCUSSION', 'INTEGRATED'];
 const WORD_LIMITS = {
@@ -65,6 +65,7 @@ export default function TOEFLEssayPage() {
   const [isDragging, setIsDragging] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const t = useTranslations("EssayPage");
+  const locale = useLocale();
 
   // 오디오 URL 설정
   useEffect(() => {
@@ -304,7 +305,6 @@ export default function TOEFLEssayPage() {
         router.push('/login');
         return;
       }
-
       const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SUBMIT}`, {
         method: 'POST',
         headers: {
@@ -317,7 +317,7 @@ export default function TOEFLEssayPage() {
           testLevel: selectedType,
           essayContents: essay,
           question: selectedQuestion.question,
-          lang: 'en',
+          lang: locale,
           timeSpent: timeElapsed
         }),
       });

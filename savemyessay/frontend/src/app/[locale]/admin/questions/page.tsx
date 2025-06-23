@@ -23,6 +23,7 @@ const TEST_LEVELS = {
   TOEFL_ACADEMIC_DISCUSSION: 'Academic Discussion',
   TOEFL_INTEGRATED: 'Integrated',
   
+  GRE_ISSUE: 'Issue',
   // DELE levels
   DELE_A1: 'A1',
   DELE_A2: 'A2',
@@ -49,7 +50,8 @@ const CATEGORY_TYPES = {
 
 const QUESTION_TYPES = {
   ACADEMIC_DISCUSSION: 'Academic Discussion',
-  INTEGRATED: 'Integrated'
+  INTEGRATED: 'Integrated',
+  ISSUE: 'Issue'
 }; 
 
 export default function AdminQuestionsPage() {

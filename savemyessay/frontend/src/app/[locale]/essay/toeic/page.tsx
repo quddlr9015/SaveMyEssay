@@ -27,6 +27,18 @@ const TEMPLATES = {
   'Advanced': 'The given topic discusses [Topic].\n\nTo begin with, [First point]\nFurthermore, [Second point]\nMoreover, [Third point]\nIn conclusion, [Conclusion]'
 };
 
+interface Question {
+  id: number;
+  title: string;
+  question: string;
+  readingPassage?: string;
+  listeningPassage?: string;
+  listeningPassageUrl?: string;
+  questionType: string;
+  timeLimit: number;
+  points: number;
+}
+
 export default function TOEICEssayPage() {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState<string>('');
@@ -37,6 +49,89 @@ export default function TOEICEssayPage() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const t = useTranslations("EssayPage");
   const locale = useLocale();
+  const [isLoading, setIsLoading] = useState(false);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+
+      // 문제 목록 가져오기
+      useEffect(() => {
+        const fetchQuestions = async () => {
+          if (!selectedType) return;
+          
+          setIsLoading(true);
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+              router.push('/login');
+              return;
+            }
+    
+            const params = new URLSearchParams({
+              testType: 'TOEIC',
+              category: 'ESSAY',
+              questionType: selectedType
+            });
+    
+            const response = await fetch(
+              `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+                credentials: 'include',
+              }
+            );
+    
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => null);
+              throw new Error(errorData?.message || t("questionListFailed"));
+            }
+    
+            const data = await response.json();
+            setQuestions(data);
+          } catch (error) {
+            alert(error instanceof Error ? error.message : '문제 목록을 가져오는 중 오류가 발생했습니다.');
+          } finally {
+            setIsLoading(false);
+          }
+        };
+    
+        fetchQuestions();
+      }, [selectedType, router]);
+    
+      // 선택된 문제 가져오기
+      const fetchSelectedQuestion = async (questionId: number) => {
+        setIsLoading(true);
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            router.push('/login');
+            return;
+          }
+    
+          const response = await fetch(
+            `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTIONS}?testType=TOEIC&testLevel=${selectedType}&id=${questionId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+              credentials: 'include',
+            }
+          );
+    
+          if (!response.ok) {
+            throw new Error(t("questionFetchFailed"));
+          }
+    
+          const data = await response.json();
+          setSelectedQuestion(data);
+        } catch (error) {
+          console.error('Error fetching question:', error);
+          alert(t("questionFetchError"));
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
   // 자동 저장 기능
   useEffect(() => {
@@ -69,7 +164,7 @@ export default function TOEICEssayPage() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedType || !essay) {
+    if (!selectedType || !essay || !selectedQuestion) {
       alert(t("fillAllFields"));
       return;
     }
@@ -94,6 +189,7 @@ export default function TOEICEssayPage() {
           testName: 'TOEIC',
           testLevel: selectedType,
           essayContents: essay,
+          question: selectedQuestion.question,
           lang: locale,
           timeSpent: timeElapsed
         }),
@@ -105,7 +201,7 @@ export default function TOEICEssayPage() {
 
       const result = await response.json();
       localStorage.removeItem('toeic_draft_essay');
-      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=&examType=TOEIC&deleLevel=${selectedType}`);
+      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEIC&deleLevel=${selectedType}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
       alert(t("submitError"));
@@ -153,28 +249,83 @@ export default function TOEICEssayPage() {
               <CardTitle className="text-xl font-medium text-gray-900">{t("problemType")}</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
-              <div>
-                <label className="block text-sm font-medium mb-3 text-gray-600">{t("problemType")}</label>
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                    <SelectValue placeholder={t("problemType")} />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-200">
-                    {TEST_TYPES.map((type) => (
-                      <SelectItem 
-                        key={type} 
-                        value={type}
-                        className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                      >
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-3 text-gray-600">{t("problemType")}</label>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                      <SelectValue placeholder={t("problemType")} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      {TEST_TYPES.map((type) => (
+                        <SelectItem 
+                          key={type} 
+                          value={type}
+                          className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                        >
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+              {selectedType && (
+                  <div>
+                    <label className="block text-sm font-medium mb-3 text-gray-600">{t("selectQuestion")}</label>
+                    <div className="grid gap-4">
+                      {isLoading ? (
+                        <div className="text-center py-4">{t("loading")}</div>
+                      ) : (
+                        questions.map((question) => (
+                          <Card
+                            key={question.id}
+                            className={`cursor-pointer transition-all ${
+                              selectedQuestion?.id === question.id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'hover:border-gray-300'
+                            }`}
+                            onClick={() => fetchSelectedQuestion(question.id)}
+                          >
+                            <CardContent className="p-4">
+                              <h3 className="font-medium">{question.title}</h3>
+                            </CardContent>
+                          </Card>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
         </motion.div>
+
+        {selectedQuestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader className="border-b border-gray-100">
+                <CardTitle className="text-xl font-medium text-gray-900">{t("problem")}</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="prose max-w-none">
+                  <h3 className="text-lg font-medium mb-4">{selectedQuestion.title}</h3>
+                  <p className="whitespace-pre-wrap">{selectedQuestion.question}</p>
+                  {selectedQuestion.readingPassage && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                      <h4 className="font-medium mb-2">Reading Passage:</h4>
+                      <p className="whitespace-pre-wrap">{selectedQuestion.readingPassage}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -214,7 +365,7 @@ export default function TOEICEssayPage() {
                 </Button>
               </div>
               <Textarea
-                placeholder="에세이를 작성해주세요..."
+                placeholder={t("essayWritingPlaceholder")}
                 value={essay}
                 onChange={(e) => setEssay(e.target.value)}
                 className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
@@ -239,7 +390,7 @@ export default function TOEICEssayPage() {
           </Button>
           <Button 
             onClick={handleSubmit}
-            disabled={isSubmitting || !selectedType || !essay}
+            disabled={isSubmitting || !selectedType || !essay || !selectedQuestion}
             className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
           >
             {isSubmitting ? t("submitting") : t("submit")}

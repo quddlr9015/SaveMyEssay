@@ -60,7 +60,14 @@
             "marketing": {
                 "title": "Marketing Information Consent (Optional)"
             }
-        }
+        },
+        "testType": "What test are you preparing for? (Optional)",
+        "example": "E.g.:",
+        "inputTargetScore": "Enter target score",
+        "targetScoreSaveFailed": "Failed to save target score.",
+        "section": "Section",
+        "score": "Score",
+        "targetScore": "Please enter your target score."
     },
     "DashboardPage": {
         "goal": "Current Goal",

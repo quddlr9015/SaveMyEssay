@@ -25,7 +25,7 @@ export default function ContactPage() {
         <p className="text-gray-700 mb-6 text-base">{t("description")}</p>
         <div className="mt-8">
           <a
-            href="mailto:contact@savemyessay.com"
+            href="mailto:quddlr9015@gmail.com" // temporary email
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-indigo-400 to-pink-400 text-white font-semibold shadow-md hover:from-pink-500 hover:to-indigo-500 transition-all duration-200 text-lg"
           >
             <svg
@@ -42,7 +42,7 @@ export default function ContactPage() {
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
             </svg>
-            contact@savemyessay.com
+            quddlr9015@gmail.com
           </a>
         </div>
       </div>

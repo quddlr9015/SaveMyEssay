@@ -11,7 +11,7 @@ import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 
-const TEST_TYPES = ['Issue', 'Argument'];
+const TEST_TYPES = ['Issue'];
 const WORD_LIMITS = {
   'Issue': 500,
   'Argument': 400
@@ -126,7 +126,7 @@ export default function GREEssayPage() {
   const wordLimit = selectedType ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS] : 0;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

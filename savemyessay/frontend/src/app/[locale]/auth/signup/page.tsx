@@ -2,7 +2,7 @@
 
 import { useState, Suspense, Fragment } from "react";
 import { useSearchParams } from "next/navigation";
-import { getApiUrl } from "@/utils/api";
+import { API_ENDPOINTS, getApiUrl } from "@/utils/api";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from "next-intl";
@@ -14,8 +14,43 @@ interface TermSection {
   required: boolean;
 }
 
+const TEST_TYPES = {
+  'TOEFL': ['Academic Discussion', 'Integrated'],
+  'TOEIC': ['Basic', 'Advanced'],
+  'GRE': ['Issue']
+};
+
 function SignUpForm() {
   const t = useTranslations("SignUpPage");
+
+  const getScoreRange = (test: string) => {
+    switch (test) {
+      case 'TOEFL':
+        return `0-30 (Writing ${t("score")})`;
+      case 'TOEIC':
+        return `0-200 (Writing ${t("score")})`;
+      case 'GRE':
+        return `0-6 (Writing ${t("score")})`;
+      default:
+        return '';
+    }
+  };
+
+  const getScorePlaceholder = (test: string) => {
+    switch (test) {
+      case 'TOEFL':
+        return `${t("example")} 25`;
+      case 'TOEIC':
+        return `${t("example")} 180`;
+      case 'GRE':
+        return `${t("example")} 5.5`;
+      default:
+        return t("inputTargetScore");
+    }
+  };
+  const [selectedTest, setSelectedTest] = useState<string>('');
+  const [targetScore, setTargetScore] = useState<string>('');
+  const [showScoreInput, setShowScoreInput] = useState(false);
 
   const terms: TermSection[] = [
     {
@@ -97,6 +132,13 @@ function SignUpForm() {
       alert(t("requiredTerms"));
       return;
     }
+
+    // 시험을 선택했는데 목표점수를 입력하지 않은 경우
+    if (selectedTest && !targetScore.trim()) {
+      alert(t("targetScoreRequired"));
+      return;
+    }
+    
     try {
       const response = await fetch(`${getApiUrl()}/auth/google/signup`, {
         method: "POST",
@@ -112,6 +154,24 @@ function SignUpForm() {
         // 토큰 저장
         if (data.accessToken) {
           localStorage.setItem('token', data.accessToken);
+
+          if (selectedTest && targetScore) {
+            const scoreResponse = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SET_TARGET_SCORE}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.accessToken}`,
+              },
+              body: JSON.stringify({
+                testType: selectedTest,
+                targetScore: parseInt(targetScore)
+              }),
+            });
+
+            if (!scoreResponse.ok) {
+              throw new Error(t("targetScoreSaveFailed"));
+            }
+          }
         }
         window.location.href = '/dashboard';
       } else {
@@ -128,6 +188,20 @@ function SignUpForm() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleTestSelect = (test: string) => {
+    if (selectedTest === test) {
+      // 같은 버튼을 다시 누르면 선택 해제
+      setSelectedTest('');
+      setShowScoreInput(false);
+      setTargetScore('');
+    } else {
+      // 다른 버튼을 누르면 선택
+      setSelectedTest(test);
+      setShowScoreInput(true);
+      setTargetScore('');
+    }
   };
 
   const handleAgreementChange = (termId: string, checked: boolean) => {
@@ -183,6 +257,62 @@ function SignUpForm() {
                 placeholder={t("name")}
               />
             </div>
+            
+            <div className="mt-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">{t("testType")}</h3>
+              <div className="grid grid-cols-1 gap-3">
+                {Object.keys(TEST_TYPES).map((test) => (
+                  <button
+                    key={test}
+                    type="button"
+                    onClick={() => handleTestSelect(test)}
+                    className={`w-full p-4 text-left rounded-lg border-2 transition-all duration-200 ${
+                      selectedTest === test 
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md' 
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold">{test}</span>
+                      {selectedTest === test && (
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {TEST_TYPES[test as keyof typeof TEST_TYPES].join(' • ')}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {showScoreInput && (
+              <div className="mt-4">
+                <label htmlFor="targetScore" className="block text-sm font-medium text-gray-700">
+                  {t("targetScore")} <span className="text-red-500">*</span>
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="targetScore"
+                    name="targetScore"
+                    type="number"
+                    required
+                    value={targetScore}
+                    onChange={(e) => setTargetScore(e.target.value)}
+                    placeholder={getScorePlaceholder(selectedTest)}
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    {getScoreRange(selectedTest)}
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <div className="mt-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">{t("termsOfService")}</h3>
               <div className="space-y-4">

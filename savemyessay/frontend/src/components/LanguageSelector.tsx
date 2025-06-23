@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 import { useRouter, usePathname } from '@/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 
 const languageOptions = [
   { value: 'ko', label: '한국어' },
@@ -19,6 +20,7 @@ const languageOptions = [
 export function LanguageSelector() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,10 @@ export function LanguageSelector() {
   }
 
   const handleLanguageChange = (locale: string) => {
-    router.replace(pathname, { locale });
+    const currentSearchParams = searchParams.toString();
+    // to keep the search params
+    const newPath = currentSearchParams ? `${pathname}?${currentSearchParams}` : pathname;
+    router.replace(newPath, { locale });
   };
 
   return (

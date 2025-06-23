@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link, usePathname} from "@/i18n/routing";
-import { useEffect, useState } from "react";
+import { Link, usePathname } from "@/i18n/routing";
+import { useEffect, useState, useRef } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 
 export function NavigationBar() {
@@ -10,12 +10,15 @@ export function NavigationBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const t = useTranslations("NavigationBar");
+  const [essayDropdownOpen, setEssayDropdownOpen] = useState(false);
+  const essayMenuRef = useRef<HTMLDivElement>(null);
+  const essayDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
-    
+
     if (token) {
       try {
         // JWT 토큰 디코딩
@@ -26,15 +29,24 @@ export function NavigationBar() {
         }).join(''));
         
         const payload = JSON.parse(jsonPayload);
-        setIsAdmin(payload.role === 'admin');
+        setIsAdmin(payload.role === "admin");
       } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error("Error decoding token:", error);
         setIsAdmin(false);
       }
     } else {
       setIsAdmin(false);
     }
   }, []);
+
+  // 드롭다운 외부 클릭/마우스아웃 시 닫기 (딜레이 포함)
+  const handleEssayMouseEnter = () => {
+    if (essayDropdownTimeout.current) clearTimeout(essayDropdownTimeout.current);
+    setEssayDropdownOpen(true);
+  };
+  const handleEssayMouseLeave = () => {
+    essayDropdownTimeout.current = setTimeout(() => setEssayDropdownOpen(false), 120);
+  };
 
   // 홈 페이지에서는 네비게이션 바를 표시하지 않음
   if (pathname === "/") {
@@ -81,16 +93,47 @@ export function NavigationBar() {
             >
               {t("dashboard")}
             </Link>
-            <Link
-              href="/essay"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                pathname === "/essay"
-                  ? "text-indigo-600"
-                  : "text-gray-700 hover:text-indigo-600"
-              }`}
+            <div
+              className="relative"
+              onMouseEnter={handleEssayMouseEnter}
+              onMouseLeave={handleEssayMouseLeave}
+              ref={essayMenuRef}
             >
-              {t("Essay")}
-            </Link>
+              <button
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none ${
+                  pathname.startsWith("/essay")
+                    ? "text-indigo-600"
+                    : "text-gray-700 hover:text-indigo-600"
+                }`}
+                type="button"
+              >
+                {t("Essay")}
+              </button>
+              <div
+                className={`absolute left-1/2 -translate-x-1/2 mt-2 flex flex-col gap-0 bg-white/80 shadow-md rounded-lg z-20 py-2 px-2 transition-all duration-200 ease-out backdrop-blur-md
+                  ${essayDropdownOpen ? 'opacity-100 visible scale-100 translate-y-0' : 'opacity-0 invisible scale-95 -translate-y-2'}`}
+                style={{ minWidth: '120px' }}
+              >
+                <Link
+                  href="/essay/toeic"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  TOEIC
+                </Link>
+                <Link
+                  href="/essay/toefl"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  TOEFL
+                </Link>
+                <Link
+                  href="/essay/gre"
+                  className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  GRE
+                </Link>
+              </div>
+            </div>
             {isAdmin && (
               <Link
                 href="/admin/questions"
@@ -119,4 +162,5 @@ export function NavigationBar() {
       </div>
     </nav>
   );
-} 
+}
+

@@ -28,7 +28,10 @@ export enum TestLevel {
     IELTS_BAND_6 = 'IELTS_BAND_6',
     IELTS_BAND_7 = 'IELTS_BAND_7',
     IELTS_BAND_8 = 'IELTS_BAND_8',
-    IELTS_BAND_9 = 'IELTS_BAND_9'
+    IELTS_BAND_9 = 'IELTS_BAND_9',
+
+    // GRE 레벨
+    GRE_ISSUE = 'GRE_ISSUE',
 }
 
 export enum QuestionType {
@@ -37,7 +40,8 @@ export enum QuestionType {
     LISTENING = 'LISTENING',
     SPEAKING = 'SPEAKING',
     ACADEMIC_DISCUSSION = 'ACADEMIC_DISCUSSION',
-    INTEGRATED = 'INTEGRATED'
+    INTEGRATED = 'INTEGRATED',
+    ISSUE = 'ISSUE'
 }
 
 @Entity()

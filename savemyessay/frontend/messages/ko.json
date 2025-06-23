@@ -60,7 +60,14 @@
             "marketing": {
                 "title": "마케팅 정보 수신 동의 (선택)"
             }
-        }
+        },
+        "testType": "어떤 시험을 준비하시나요? (선택)",
+        "example": "예:",
+        "inputTargetScore": "목표 점수 입력",
+        "targetScoreSaveFailed": "목표 점수 저장에 실패했습니다.",
+        "section": "섹션",
+        "score": "점수",
+        "targetScore": "목표 점수를 입력해주세요."
     },
     "DashboardPage": {
         "goal": "현재 목표",

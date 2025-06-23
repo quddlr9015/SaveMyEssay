@@ -339,7 +339,7 @@ function DashboardContent() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                     <XAxis 
                       dataKey="date" 
-                      label={{ value: t("date"), position: 'insideBottom', offset: -5 }}
+                      label={{ value: t("date"), position: 'insideBottom', offset: -4 }}
                       stroke="#4b5563"
                     />
                     <YAxis 

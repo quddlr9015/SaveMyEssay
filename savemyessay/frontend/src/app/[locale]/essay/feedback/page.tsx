@@ -23,7 +23,7 @@ function FeedbackContent() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">{t("title")}</h2>
-          <Link href="/essay">
+          <Link href={`/essay/${examType?.toLowerCase()}`}> {/* TODO: 문제 유형에 따라 다른 페이지로 이동 */}
             <Button variant="outline">{t("newEssay")}</Button>
           </Link>
         </div>

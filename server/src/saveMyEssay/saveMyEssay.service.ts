@@ -67,10 +67,13 @@ export class SaveMyEssayService {
                 Logger.error(`[ChatGPT Service] Invalid user: ${JSON.stringify(user)}`);
                 throw new Error('유효하지 않은 사용자 정보입니다.');
             }
-
+            const LNAGUES = {
+                'ko': 'Korean',
+                'en': 'English',
+            }
             const systemPrompt = testName === 'DELE'
-                ? `You are a ${testName} ${testLevel} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${lang}`
-                : `You are a ${testName} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${lang}`;
+                ? `You are a ${testName} ${testLevel} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${LNAGUES[lang]}`
+                : `You are a ${testName} writing grader. Please grade the following essay and give feedback in JSON format with the following structure: { "score": number, "feedback": string, "details": { "grammar": string[], "vocabulary": string[], "content": string[], "organization": string[] } }. Always give response in ${LNAGUES[lang]}`;
 
             const userPrompt = `question: ${question}\n essay: ${essayContents}`;
             Logger.log(`[ChatGPT Service] Grading essay for ${testName}`);

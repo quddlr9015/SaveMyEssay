@@ -2,25 +2,54 @@
 
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { removeToken, isTokenValid } from "@/utils/api";
 
 export default function Home() {
   const router = useRouter();
   const t = useTranslations("HomePage");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // 로컬 스토리지에서 토큰 확인
-    const token = localStorage.getItem("token");
-    if (token) {
-      // 토큰이 있으면 대시보드로 리다이렉트
-      router.push("/dashboard");
-    }
+    const checkAuthAndRedirect = async () => {
+      try {
+        // 토큰 유효성 검사
+        const isValid = await isTokenValid();
+        
+        if (isValid) {
+          // 토큰이 유효하면 대시보드로 리다이렉트
+          router.push("/dashboard");
+        } else {
+          // 토큰이 유효하지 않으면 제거
+          removeToken();
+          setIsCheckingAuth(false);
+        }
+      } catch (error) {
+        // 에러 발생 시 토큰 제거
+        removeToken();
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuthAndRedirect();
   }, [router]);
 
   const handleLogoClick = () => {
     router.push("/dashboard");
   };
+
+  // 인증 확인 중일 때 로딩 상태 표시
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-pink-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-pink-100">

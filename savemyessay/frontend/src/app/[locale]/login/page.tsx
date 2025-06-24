@@ -3,7 +3,7 @@
 import { useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-import { API_ENDPOINTS, getApiUrl } from "@/utils/api";
+import { API_ENDPOINTS, getApiUrl, getToken, removeToken, isTokenValid } from "@/utils/api";
 import { useTranslations } from "next-intl";
 
 export default function Login() {
@@ -15,28 +15,16 @@ export default function Login() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setIsLoading(false);
-          return;
-        }
+        const isValid = await isTokenValid();
         
-        const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.AUTH.CHECK}`, {
-          credentials: "include",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        
-        if (response.ok) {
+        if (isValid) {
           router.push('/dashboard');
         } else {
-          localStorage.removeItem('token');
+          removeToken();
           setIsLoading(false);
         }
       } catch (error) {
-        localStorage.removeItem('token');
+        removeToken();
         setIsLoading(false);
       }
     };

@@ -25,12 +25,12 @@ const TEST_LEVELS = {
   
   GRE_ISSUE: 'Issue',
   // DELE levels
-  DELE_A1: 'A1',
-  DELE_A2: 'A2',
-  DELE_B1: 'B1',
-  DELE_B2: 'B2',
-  DELE_C1: 'C1',
-  DELE_C2: 'C2',
+  // DELE_A1: 'A1',
+  // DELE_A2: 'A2',
+  // DELE_B1: 'B1',
+  // DELE_B2: 'B2',
+  // DELE_C1: 'C1',
+  // DELE_C2: 'C2',
   
   // IELTS levels
   IELTS_BAND_4: 'Band 4',
@@ -38,7 +38,12 @@ const TEST_LEVELS = {
   IELTS_BAND_6: 'Band 6',
   IELTS_BAND_7: 'Band 7',
   IELTS_BAND_8: 'Band 8',
-  IELTS_BAND_9: 'Band 9'
+  IELTS_BAND_9: 'Band 9',
+
+  // TOEIC levels
+  TOEIC_PICTURE: 'Picture',
+  TOEIC_WRITTEN_REQUEST: 'Written Request',
+  TOEIC_OPINION: 'Opinion'
 };
 
 const CATEGORY_TYPES = {
@@ -51,7 +56,10 @@ const CATEGORY_TYPES = {
 const QUESTION_TYPES = {
   ACADEMIC_DISCUSSION: 'Academic Discussion',
   INTEGRATED: 'Integrated',
-  ISSUE: 'Issue'
+  ISSUE: 'Issue',
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 'Write a sentence based on a picture',
+  RESPOND_TO_A_WRITTEN_REQUEST: 'Respond to a written request',
+  WRITE_AN_OPINION_ESSAY: 'Write an opinion essay'
 }; 
 
 export default function AdminQuestionsPage() {

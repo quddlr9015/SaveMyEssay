@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { useEffect, useState, useRef } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { getToken } from "@/utils/api";
 
 export function NavigationBar() {
   const pathname = usePathname();
@@ -16,7 +17,7 @@ export function NavigationBar() {
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
-    const token = localStorage.getItem("token");
+    const token = getToken();
     setIsLoggedIn(!!token);
 
     if (token) {

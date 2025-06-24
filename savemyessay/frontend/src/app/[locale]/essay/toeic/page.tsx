@@ -11,15 +11,28 @@ import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 
-const TEST_TYPES = ['Basic', 'Advanced'];
+const TEST_TYPES = {
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 'Write a sentence based on a picture',
+  RESPOND_TO_A_WRITTEN_REQUEST: 'Respond to a written request',
+  WRITE_AN_OPINION_ESSAY: 'Write an opinion essay'
+};
+
+const TEST_LEVELS = {
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: "PICTURE",
+  RESPOND_TO_A_WRITTEN_REQUEST: "WRITTEN REQUEST",
+  WRITE_AN_OPINION_ESSAY: "OPINION"
+};
+
 const WORD_LIMITS = {
-  'Basic': 200,
-  'Advanced': 300
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 100,
+  RESPOND_TO_A_WRITTEN_REQUEST: 100,
+  WRITE_AN_OPINION_ESSAY: 300
 };
 
 const TIME_LIMITS = {
-  'Basic': 30, // 30분
-  'Advanced': 45 // 45분
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 1.36,
+  RESPOND_TO_A_WRITTEN_REQUEST: 10,
+  WRITE_AN_OPINION_ESSAY: 30
 };
 
 const TEMPLATES = {
@@ -187,11 +200,14 @@ export default function TOEICEssayPage() {
         credentials: 'include',
         body: JSON.stringify({
           testName: 'TOEIC',
-          testLevel: selectedType,
+          testLevel: TEST_LEVELS[selectedType as keyof typeof TEST_LEVELS],
           essayContents: essay,
           question: selectedQuestion.question,
           lang: locale,
-          timeSpent: timeElapsed
+          timeSpent: timeElapsed,
+          range: 200,
+          increment: 10,
+          description: selectedQuestion.listeningPassageUrl ? selectedQuestion.listeningPassage : null
         }),
       });
 
@@ -201,7 +217,7 @@ export default function TOEICEssayPage() {
 
       const result = await response.json();
       localStorage.removeItem('toeic_draft_essay');
-      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEIC&deleLevel=${selectedType}`);
+      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEIC&deleLevel=${TEST_LEVELS[selectedType as keyof typeof TEST_LEVELS]}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
       alert(t("submitError"));
@@ -257,13 +273,13 @@ export default function TOEICEssayPage() {
                       <SelectValue placeholder={t("problemType")} />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
-                      {TEST_TYPES.map((type) => (
+                      {Object.entries(TEST_TYPES).map(([key, value]) => (
                         <SelectItem 
-                          key={type} 
-                          value={type}
+                          key={key} 
+                          value={key}
                           className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
                         >
-                          {type}
+                          {value}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -315,10 +331,20 @@ export default function TOEICEssayPage() {
                 <div className="prose max-w-none">
                   <h3 className="text-lg font-medium mb-4">{selectedQuestion.title}</h3>
                   <p className="whitespace-pre-wrap">{selectedQuestion.question}</p>
-                  {selectedQuestion.readingPassage && (
+                  {!selectedQuestion.listeningPassageUrl && selectedQuestion.readingPassage && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-md">
                       <h4 className="font-medium mb-2">Reading Passage:</h4>
                       <p className="whitespace-pre-wrap">{selectedQuestion.readingPassage}</p>
+                    </div>
+                  )}
+                  {selectedQuestion.listeningPassageUrl && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-md flex flex-col items-center">
+                      <h4 className="font-medium mb-2">Picture:</h4>
+                      <img
+                        src={selectedQuestion.listeningPassageUrl}
+                        alt="Question related"
+                        className="max-w-xs max-h-64 object-contain rounded shadow"
+                      />
                     </div>
                   )}
                 </div>

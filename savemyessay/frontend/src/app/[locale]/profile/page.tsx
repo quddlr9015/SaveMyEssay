@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { fetchApi } from '@/utils/api';
+import { fetchApi, removeToken } from '@/utils/api';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/routing';
 import { useTranslations } from 'next-intl';
@@ -62,7 +62,7 @@ export default function ProfilePage() {
 
       if (response) {
         toast.success(t("logoutSuccess"));
-        localStorage.clear();
+        removeToken();
         sessionStorage.clear();
         router.push('/');
       }

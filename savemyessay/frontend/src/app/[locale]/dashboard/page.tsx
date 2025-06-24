@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Search, Filter, ArrowUpDown } from 'lucide-react';
-import { getApiUrl } from '@/utils/api';
+import { getApiUrl, getToken, setToken } from '@/utils/api';
 import { useTranslations } from 'next-intl';
 
 interface EssayHistory {
@@ -74,14 +74,14 @@ function DashboardContent() {
     // URL에서 토큰 가져오기
     const token = searchParams.get('token');
     if (token) {
-      localStorage.setItem('token', token);
+      setToken(token);
     }
   }, [searchParams]);
 
   useEffect(() => {
     const fetchHistories = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         
         const response = await fetch(`${getApiUrl()}/essay_grader/history`, {
           credentials: 'include',
@@ -134,7 +134,7 @@ function DashboardContent() {
   useEffect(() => {
     const fetchTargetScore = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         const response = await fetch(`${getApiUrl()}/essay_grader/target-score`, {
           credentials: 'include',
           headers: {

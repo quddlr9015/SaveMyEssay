@@ -13,7 +13,11 @@ import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
 import { Howl } from 'howler';
 import { useTranslations, useLocale } from 'next-intl';
 
-const TEST_TYPES = ['ACADEMIC_DISCUSSION', 'INTEGRATED'];
+const TEST_TYPES = {
+  ACADEMIC_DISCUSSION: 'ACADEMIC DISCUSSION',
+  INTEGRATED: 'INTEGRATED'
+};
+
 const WORD_LIMITS = {
   'ACADEMIC_DISCUSSION': 100,
   'INTEGRATED': 150
@@ -314,11 +318,14 @@ export default function TOEFLEssayPage() {
         credentials: 'include',
         body: JSON.stringify({
           testName: 'TOEFL',
-          testLevel: selectedType,
+          testLevel: TEST_TYPES[selectedType as keyof typeof TEST_TYPES],
           essayContents: essay,
           question: selectedQuestion.question,
           lang: locale,
-          timeSpent: timeElapsed
+          timeSpent: timeElapsed,
+          range: 30,
+          increment: 1,
+          description: null
         }),
       });
 
@@ -328,7 +335,7 @@ export default function TOEFLEssayPage() {
 
       const result = await response.json();
       localStorage.removeItem('toefl_draft_essay');
-      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEFL&deleLevel=${selectedType}`);
+      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEFL&deleLevel=${TEST_TYPES[selectedType as keyof typeof TEST_TYPES]}`);
     } catch (error) {
       console.error('Error submitting essay:', error);
       alert(t("submitError"));
@@ -384,13 +391,13 @@ export default function TOEFLEssayPage() {
                       <SelectValue placeholder={t("problemType")} />
                     </SelectTrigger>
                     <SelectContent className="bg-white border-gray-200">
-                      {TEST_TYPES.map((type) => (
+                      {Object.entries(TEST_TYPES).map(([key, value]) => (
                         <SelectItem 
-                          key={type} 
-                          value={type}
+                          key={key} 
+                          value={key}
                           className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
                         >
-                          {type}
+                          {value}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -11,19 +11,17 @@ import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 
-const TEST_TYPES = ['Issue'];
+const TEST_TYPES = ['ISSUE'];
 const WORD_LIMITS = {
-  'Issue': 500,
-  'Argument': 400
+  'ISSUE': 500,
 };
 
 const TIME_LIMITS = {
-  'Issue': 30, // 30분
-  'Argument': 30 // 30분
+  'ISSUE': 30, // 30분
 };
 
 const TEMPLATES = {
-  'Issue': 'The issue at hand is [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nThird, [Third point]\nIn conclusion, [Conclusion]',
+  'ISSUE': 'The issue at hand is [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nThird, [Third point]\nIn conclusion, [Conclusion]',
   'Argument': 'The argument presented states that [Argument].\n\nFirst, [First analysis]\nSecond, [Second analysis]\nThird, [Third analysis]\nIn conclusion, [Conclusion]'
 };
 
@@ -190,7 +188,10 @@ export default function GREEssayPage() {
           essayContents: essay,
           question: selectedQuestion.question,
           lang: locale,
-          timeSpent: timeElapsed
+          timeSpent: timeElapsed,
+          range: 6,
+          increment: 0.5,
+          description: null
         }),
       });
 

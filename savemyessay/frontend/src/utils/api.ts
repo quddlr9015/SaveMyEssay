@@ -21,12 +21,53 @@ export const API_ENDPOINTS = {
     },
 } as const;
 
+// Token management utilities
+export const getToken = (): string | null => {
+    if (typeof window === 'undefined') {
+        return null; // Server-side
+    }
+    return localStorage.getItem('token');
+};
+
+export const setToken = (token: string): void => {
+    if (typeof window === 'undefined') {
+        return; // Server-side
+    }
+    localStorage.setItem('token', token);
+};
+
+export const removeToken = (): void => {
+    if (typeof window === 'undefined') {
+        return; // Server-side
+    }
+    localStorage.removeItem('token');
+};
+
+export const isTokenValid = async (): Promise<boolean> => {
+    try {
+        const token = getToken();
+        if (!token) return false;
+
+        const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.AUTH.CHECK}`, {
+            credentials: 'include',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        return response.ok;
+    } catch (error) {
+        console.error('Token validation error:', error);
+        return false;
+    }
+};
+
 export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
     const baseUrl = getApiUrl();
     const url = `${baseUrl}${endpoint}`;
 
     // 로컬 스토리지에서 토큰 가져오기
-    const token = localStorage.getItem('token');
+    const token = getToken();
 
     const response = await fetch(url, {
         ...options,
@@ -44,4 +85,4 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
     }
 
     return response.json();
-}; 
+};

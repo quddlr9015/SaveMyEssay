@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/routing';
-import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
+import { API_ENDPOINTS, getApiUrl, getToken } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
@@ -58,7 +58,7 @@ export default function GREEssayPage() {
         
         setIsLoading(true);
         try {
-          const token = localStorage.getItem('token');
+          const token = getToken();
           if (!token) {
             router.push('/login');
             return;
@@ -101,7 +101,7 @@ export default function GREEssayPage() {
     const fetchSelectedQuestion = async (questionId: number) => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
           router.push('/login');
           return;
@@ -169,7 +169,7 @@ export default function GREEssayPage() {
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         alert(t("loginRequired"));
         router.push('/login');
@@ -191,7 +191,9 @@ export default function GREEssayPage() {
           timeSpent: timeElapsed,
           range: 6,
           increment: 0.5,
-          description: null
+          description: null,
+          passage: selectedQuestion.readingPassage,
+          listening: null
         }),
       });
 

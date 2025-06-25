@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/routing';
-import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
+import { API_ENDPOINTS, getApiUrl, getToken } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
@@ -184,7 +184,7 @@ export default function TOEFLEssayPage() {
       
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (!token) {
           router.push('/login');
           return;
@@ -227,7 +227,7 @@ export default function TOEFLEssayPage() {
   const fetchSelectedQuestion = async (questionId: number) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         router.push('/login');
         return;
@@ -303,7 +303,7 @@ export default function TOEFLEssayPage() {
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         alert(t("loginRequired"));
         router.push('/login');
@@ -323,9 +323,11 @@ export default function TOEFLEssayPage() {
           question: selectedQuestion.question,
           lang: locale,
           timeSpent: timeElapsed,
-          range: 30,
+          range: 15,
           increment: 1,
-          description: null
+          description: null,
+          passage: selectedQuestion.readingPassage,
+          listening: selectedQuestion.listeningPassage ? selectedQuestion.listeningPassage : null,
         }),
       });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -65,6 +65,8 @@ const QUESTION_TYPES = {
 export default function AdminQuestionsPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     testType: '',
     testLevel: '',
@@ -77,6 +79,44 @@ export default function AdminQuestionsPage() {
     listeningPassage: '',
     listeningPassageUrl: ''
   });
+
+  useEffect(() => {
+    checkAdminPermission();
+  }, []);
+
+  const checkAdminPermission = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      // JWT 토큰 디코딩
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      
+      const payload = JSON.parse(jsonPayload);
+      if (payload.role !== 'admin') {
+        alert('관리자 권한이 필요합니다.');
+        router.push('/dashboard');
+        return;
+      }
+      
+      setIsAdmin(true);
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      alert('토큰 확인 중 오류가 발생했습니다.');
+      router.push('/login');
+      return;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +140,11 @@ export default function AdminQuestionsPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 403) {
+          alert('관리자 권한이 필요합니다.');
+          router.push('/dashboard');
+          return;
+        }
         throw new Error('문제 추가에 실패했습니다.');
       }
 
@@ -138,6 +183,18 @@ export default function AdminQuestionsPage() {
       [name]: value
     }));
   };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center">로딩 중...</div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="container mx-auto p-6">

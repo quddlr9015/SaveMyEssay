@@ -12,8 +12,11 @@ export function NavigationBar() {
   const [isAdmin, setIsAdmin] = useState(false);
   const t = useTranslations("NavigationBar");
   const [essayDropdownOpen, setEssayDropdownOpen] = useState(false);
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
   const essayMenuRef = useRef<HTMLDivElement>(null);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
   const essayDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
+  const adminDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
@@ -47,6 +50,14 @@ export function NavigationBar() {
   };
   const handleEssayMouseLeave = () => {
     essayDropdownTimeout.current = setTimeout(() => setEssayDropdownOpen(false), 120);
+  };
+
+  const handleAdminMouseEnter = () => {
+    if (adminDropdownTimeout.current) clearTimeout(adminDropdownTimeout.current);
+    setAdminDropdownOpen(true);
+  };
+  const handleAdminMouseLeave = () => {
+    adminDropdownTimeout.current = setTimeout(() => setAdminDropdownOpen(false), 120);
   };
 
   // 홈 페이지에서는 네비게이션 바를 표시하지 않음
@@ -136,16 +147,41 @@ export function NavigationBar() {
               </div>
             </div>
             {isAdmin && (
-              <Link
-                href="/admin/questions"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  pathname === "/admin/questions"
-                    ? "text-indigo-600"
-                    : "text-gray-700 hover:text-indigo-600"
-                }`}
+              <div
+                className="relative"
+                onMouseEnter={handleAdminMouseEnter}
+                onMouseLeave={handleAdminMouseLeave}
+                ref={adminMenuRef}
               >
-                관리자
-              </Link>
+                <button
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none ${
+                    pathname.startsWith("/admin")
+                      ? "text-indigo-600"
+                      : "text-gray-700 hover:text-indigo-600"
+                  }`}
+                  type="button"
+                >
+                  관리자
+                </button>
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 mt-2 flex flex-col gap-0 bg-white/80 shadow-md rounded-lg z-20 py-2 px-2 transition-all duration-200 ease-out backdrop-blur-md
+                    ${adminDropdownOpen ? 'opacity-100 visible scale-100 translate-y-0' : 'opacity-0 invisible scale-95 -translate-y-2'}`}
+                  style={{ minWidth: '120px' }}
+                >
+                  <Link
+                    href="/admin/questions"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  >
+                    문제 관리
+                  </Link>
+                  <Link
+                    href="/admin/users"
+                    className="px-4 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                  >
+                    회원 관리
+                  </Link>
+                </div>
+              </div>
             )}
             <Link
               href="/profile"

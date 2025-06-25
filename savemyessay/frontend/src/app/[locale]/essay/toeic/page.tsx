@@ -6,15 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useRouter } from '@/i18n/routing';
-import { API_ENDPOINTS, getApiUrl } from '@/utils/api';
+import { API_ENDPOINTS, getApiUrl, getToken } from '@/utils/api';
 import { Timer } from '@/components/ui/timer';
 import { motion } from 'framer-motion';
 import { useLocale, useTranslations } from 'next-intl';
 
 const TEST_TYPES = {
-  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 'Write a sentence based on a picture',
-  RESPOND_TO_A_WRITTEN_REQUEST: 'Respond to a written request',
-  WRITE_AN_OPINION_ESSAY: 'Write an opinion essay'
+  WRITE_A_SENTENCE_BASED_ON_A_PICTURE: 'WRITE A SENTENCE BASED ON A PICTURE',
+  RESPOND_TO_A_WRITTEN_REQUEST: 'RESPOND TO A WRITTEN REQUEST',
+  WRITE_AN_OPINION_ESSAY: 'WRITE AN OPINION ESSAY'
 };
 
 const TEST_LEVELS = {
@@ -73,7 +73,7 @@ export default function TOEICEssayPage() {
           
           setIsLoading(true);
           try {
-            const token = localStorage.getItem('token');
+            const token = getToken();
             if (!token) {
               router.push('/login');
               return;
@@ -116,7 +116,7 @@ export default function TOEICEssayPage() {
       const fetchSelectedQuestion = async (questionId: number) => {
         setIsLoading(true);
         try {
-          const token = localStorage.getItem('token');
+          const token = getToken();
           if (!token) {
             router.push('/login');
             return;
@@ -184,7 +184,7 @@ export default function TOEICEssayPage() {
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) {
         alert(t("loginRequired"));
         router.push('/login');
@@ -207,7 +207,9 @@ export default function TOEICEssayPage() {
           timeSpent: timeElapsed,
           range: 200,
           increment: 10,
-          description: selectedQuestion.listeningPassageUrl ? selectedQuestion.listeningPassage : null
+          description: selectedQuestion.listeningPassageUrl ? selectedQuestion.listeningPassage : null,
+          passage: selectedQuestion.listeningPassageUrl ? null : selectedQuestion.readingPassage, // 사진일 경우 readingPassage 없음
+          listening: null
         }),
       });
 

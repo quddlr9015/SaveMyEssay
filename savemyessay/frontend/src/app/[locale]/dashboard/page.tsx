@@ -51,10 +51,17 @@ interface TargetScore {
 }
 
 const TEST_MAX_SCORES: { [key: string]: number } = {
-  'TOEFL': 30,
+  'TOEFL - ACADEMIC DISCUSSION': 15,
+  'TOEFL - INTEGRATED': 15,
+  'TOEIC - PICTURE': 200,
+  'TOEIC - WRITTEN REQUEST': 200,
+  'TOEIC - OPINION': 200,
+  'GRE - ISSUE': 6,
+  'DELE': 25,
+  'IELTS': 9,
+  'TOEFL': 15,
   'TOEIC': 200,
   'GRE': 6,
-  'DELE': 25
 };
 
 function DashboardContent() {
@@ -104,7 +111,6 @@ function DashboardContent() {
           setFilteredHistories([]);
           return;
         }
-        
         setHistories(data);
         setFilteredHistories(data);
         
@@ -117,7 +123,7 @@ function DashboardContent() {
           const latestEssay = data.sort((a: EssayHistory, b: EssayHistory) => 
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
-          setSelectedTest(latestEssay.testName);
+          setSelectedTest(`${latestEssay.testName} - ${latestEssay.testLevel}`);
         }
       } catch (error) {
         console.error('Error fetching essay histories:', error);
@@ -147,6 +153,7 @@ function DashboardContent() {
           setTargetScore(data);
           // 목표 점수가 있으면 해당 시험을 기본값으로 설정
           if (data.testType) {
+            // 여기를 어떻게 해야할까? sort?
             setSelectedTest(data.testType);
           }
         }
@@ -160,10 +167,11 @@ function DashboardContent() {
 
   const calculateStatistics = (data: EssayHistory[]): Statistics => {
     const testGroups = data.reduce((acc, curr) => {
-      if (!acc[curr.testName]) {
-        acc[curr.testName] = [];
+      const testName = `${curr.testName} - ${curr.testLevel}`;
+      if (!acc[testName]) {
+        acc[testName] = [];
       }
-      acc[curr.testName].push(curr);
+      acc[testName].push(curr);
       return acc;
     }, {} as { [key: string]: EssayHistory[] });
 
@@ -208,7 +216,9 @@ function DashboardContent() {
 
     // 시험 종류 필터링
     if (selectedTest) {
-      filtered = filtered.filter(history => history.testName === selectedTest);
+      const testName = selectedTest.split(' - ')[0];
+      const testLevel = selectedTest.split(' - ')[1];
+      filtered = filtered.filter(history => history.testName === testName && history.testLevel === testLevel);
     }
 
     // 정렬
@@ -427,7 +437,7 @@ function DashboardContent() {
                             ? "secondary" 
                             : "destructive"}
                       >
-                        {history.score} {t("dot")}
+                        {history.score} {t("dot")} / {TEST_MAX_SCORES[history.testName]}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500 line-clamp-1">

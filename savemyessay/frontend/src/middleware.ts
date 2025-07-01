@@ -9,8 +9,6 @@ const intlMiddleware = createMiddleware(routing);
 // 보호된 라우트 목록
 const protectedRoutes = ['/en/dashboard', '/en/essay', '/en/profile', '/ko/dashboard', '/ko/essay', '/ko/profile'];
 
-const isDev = process.env.NODE_ENV === 'development';
-
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     // // 보호된 라우트인지 확인

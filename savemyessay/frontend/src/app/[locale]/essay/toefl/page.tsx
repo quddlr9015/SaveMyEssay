@@ -1,36 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { useRouter } from '@/i18n/routing';
-import { API_ENDPOINTS, getApiUrl, getToken } from '@/utils/api';
-import { Timer } from '@/components/ui/timer';
-import { motion } from 'framer-motion';
-import { Play, Pause, Volume2, VolumeX, Repeat } from 'lucide-react';
-import { Howl } from 'howler';
-import { useTranslations, useLocale } from 'next-intl';
+import { useState, useEffect, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/routing";
+import { API_ENDPOINTS, fetchApi } from "@/utils/api";
+import { Timer } from "@/components/ui/timer";
+import { motion } from "framer-motion";
+import { Play, Pause, Volume2, VolumeX, Repeat } from "lucide-react";
+import { Howl } from "howler";
+import { useTranslations, useLocale } from "next-intl";
+import { useAuth } from "@/components/AuthContext";
+import { AuthGate } from "@/components/AuthGate";
 
 const TEST_TYPES = {
-  ACADEMIC_DISCUSSION: 'ACADEMIC DISCUSSION',
-  INTEGRATED: 'INTEGRATED'
+  ACADEMIC_DISCUSSION: "ACADEMIC DISCUSSION",
+  INTEGRATED: "INTEGRATED",
 };
 
 const WORD_LIMITS = {
-  'ACADEMIC_DISCUSSION': 100,
-  'INTEGRATED': 150
+  ACADEMIC_DISCUSSION: 100,
+  INTEGRATED: 150,
 };
 
 const TIME_LIMITS = {
-  'ACADEMIC_DISCUSSION': 10, // 10분
-  'INTEGRATED': 20 // 20분
+  ACADEMIC_DISCUSSION: 10, // 10분
+  INTEGRATED: 20, // 20분
 };
 
 const TEMPLATES = {
-  'ACADEMIC_DISCUSSION': 'I agree/disagree with [Professor\'s name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]',
-  'INTEGRATED': 'The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].'
+  ACADEMIC_DISCUSSION:
+    "I agree/disagree with [Professor's name] because [Your reason].\n\nFirst, [First point]\nSecond, [Second point]\nFinally, [Conclusion]",
+  INTEGRATED:
+    "The reading and the lecture are both about [Topic]. The reading states that [Reading point]. However, the lecture contradicts this by saying [Lecture point].",
 };
 
 interface Question {
@@ -47,14 +57,16 @@ interface Question {
 
 export default function TOEFLEssayPage() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [essay, setEssay] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [essay, setEssay] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [showListeningPassage, setShowListeningPassage] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -70,12 +82,13 @@ export default function TOEFLEssayPage() {
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const t = useTranslations("EssayPage");
   const locale = useLocale();
+  const { accessToken, setAccessToken } = useAuth();
 
   // 오디오 URL 설정
   useEffect(() => {
     if (selectedQuestion?.listeningPassageUrl) {
       setIsAudioLoading(true);
-      
+
       const newSound = new Howl({
         src: [selectedQuestion.listeningPassageUrl],
         html5: true,
@@ -84,7 +97,7 @@ export default function TOEFLEssayPage() {
           setDuration(newSound.duration());
         },
         onloaderror: () => {
-          console.error('Error loading audio');
+          console.error("Error loading audio");
           alert(t("audioError"));
           setIsAudioLoading(false);
         },
@@ -94,7 +107,7 @@ export default function TOEFLEssayPage() {
         onend: () => {
           setIsPlaying(false);
           setCurrentTime(0);
-        }
+        },
       });
 
       setSound(newSound);
@@ -181,76 +194,70 @@ export default function TOEFLEssayPage() {
   useEffect(() => {
     const fetchQuestions = async () => {
       if (!selectedType) return;
-      
+
       setIsLoading(true);
       try {
-        const token = getToken();
+        const token = accessToken;
         if (!token) {
-          router.push('/login');
+          router.push("/login");
           return;
         }
 
         const params = new URLSearchParams({
-          testType: 'TOEFL',
-          category: 'ESSAY',
-          questionType: selectedType
+          testType: "TOEFL",
+          category: "ESSAY",
+          questionType: selectedType,
         });
 
-        const response = await fetch(
-          `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            credentials: 'include',
-          }
+        const data = await fetchApi(
+          `${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
+          {},
+          token,
+          setAccessToken
         );
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(errorData?.message || t("questionListFailed"));
+        if (!data) {
+          throw new Error(t("questionListFailed"));
         }
 
-        const data = await response.json();
         setQuestions(data);
       } catch (error) {
-        alert(error instanceof Error ? error.message : '문제 목록을 가져오는 중 오류가 발생했습니다.');
+        alert(
+          error instanceof Error
+            ? error.message
+            : "문제 목록을 가져오는 중 오류가 발생했습니다."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchQuestions();
-  }, [selectedType, router]);
+  }, [selectedType, router, accessToken]);
 
   // 선택된 문제 가져오기
   const fetchSelectedQuestion = async (questionId: number) => {
     setIsLoading(true);
     try {
-      const token = getToken();
+      const token = accessToken;
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
-      const response = await fetch(
-        `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTIONS}?testType=TOEFL&testLevel=${selectedType}&id=${questionId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          credentials: 'include',
-        }
+      const data = await fetchApi(
+        `${API_ENDPOINTS.ESSAY.QUESTIONS}?testType=TOEFL&testLevel=${selectedType}&id=${questionId}`,
+        {},
+        token,
+        setAccessToken
       );
 
-      if (!response.ok) {
+      if (!data) {
         throw new Error(t("questionFetchFailed"));
       }
-
-      const data = await response.json();
       setSelectedQuestion(data);
     } catch (error) {
-      console.error('Error fetching question:', error);
+      console.error("Error fetching question:", error);
       alert(t("questionFetchError"));
     } finally {
       setIsLoading(false);
@@ -261,7 +268,7 @@ export default function TOEFLEssayPage() {
   useEffect(() => {
     const autoSave = () => {
       if (essay) {
-        localStorage.setItem('toefl_draft_essay', essay);
+        localStorage.setItem("toefl_draft_essay", essay);
       }
     };
 
@@ -271,7 +278,7 @@ export default function TOEFLEssayPage() {
 
   // 초기 로드 시 저장된 초안 불러오기
   useEffect(() => {
-    const savedDraft = localStorage.getItem('toefl_draft_essay');
+    const savedDraft = localStorage.getItem("toefl_draft_essay");
     if (savedDraft) {
       setEssay(savedDraft);
     }
@@ -292,7 +299,7 @@ export default function TOEFLEssayPage() {
     if (isNaN(time)) return "0:00";
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const handleSubmit = async () => {
@@ -303,43 +310,59 @@ export default function TOEFLEssayPage() {
 
     setIsSubmitting(true);
     try {
-      const token = getToken();
+      const token = accessToken;
       if (!token) {
         alert(t("loginRequired"));
-        router.push('/login');
+        router.push("/login");
         return;
       }
-      const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SUBMIT}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+      const result = await fetchApi(
+        API_ENDPOINTS.ESSAY.SUBMIT,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            testName: "TOEFL",
+            testLevel: TEST_TYPES[selectedType as keyof typeof TEST_TYPES],
+            essayContents: essay,
+            question: selectedQuestion.question,
+            lang: locale,
+            timeSpent: timeElapsed,
+            range: 15,
+            increment: 1,
+            description: null,
+            passage: selectedQuestion.readingPassage,
+            listening: selectedQuestion.listeningPassage
+              ? selectedQuestion.listeningPassage
+              : null,
+          }),
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          testName: 'TOEFL',
-          testLevel: TEST_TYPES[selectedType as keyof typeof TEST_TYPES],
-          essayContents: essay,
-          question: selectedQuestion.question,
-          lang: locale,
-          timeSpent: timeElapsed,
-          range: 15,
-          increment: 1,
-          description: null,
-          passage: selectedQuestion.readingPassage,
-          listening: selectedQuestion.listeningPassage ? selectedQuestion.listeningPassage : null,
-        }),
-      });
+        token,
+        setAccessToken
+      );
 
-      if (!response.ok) {
+      if (!result) {
         throw new Error(t("submitFailed"));
       }
 
-      const result = await response.json();
-      localStorage.removeItem('toefl_draft_essay');
-      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=TOEFL&deleLevel=${TEST_TYPES[selectedType as keyof typeof TEST_TYPES]}`);
+      localStorage.removeItem("toefl_draft_essay");
+      router.push(
+        `/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(
+          result.feedback
+        )}&details=${encodeURIComponent(
+          JSON.stringify(result.details)
+        )}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(
+          selectedQuestion.question
+        )}&examType=TOEFL&deleLevel=${
+          TEST_TYPES[selectedType as keyof typeof TEST_TYPES]
+        }`
+      );
     } catch (error) {
-      console.error('Error submitting essay:', error);
+      console.error("Error submitting essay:", error);
       alert(t("submitError"));
     } finally {
       setIsSubmitting(false);
@@ -356,180 +379,100 @@ export default function TOEFLEssayPage() {
     }
   };
 
-  const wordLimit = selectedType ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS] : 0;
+  const handleEssayChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const newWordCount = value.split(/\s+/).filter(Boolean).length; 
+    if (newWordCount <= wordLimit) {
+      setEssay(value);
+    }
+  };
+
+  const wordLimit = selectedType
+    ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS]
+    : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="container mx-auto space-y-8 max-w-4xl"
-      >
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
-        >
-          TOEFL Essay Writing
-        </motion.h1>
-        
+    <AuthGate>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="container mx-auto space-y-8 max-w-4xl"
         >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">{t("problemType")}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-gray-600">{t("problemType")}</label>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder={t("problemType")} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      {Object.entries(TEST_TYPES).map(([key, value]) => (
-                        <SelectItem 
-                          key={key} 
-                          value={key}
-                          className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                        >
-                          {value}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
+          >
+            TOEFL Essay Writing
+          </motion.h1>
 
-                {selectedType && (
-                  <div>
-                    <label className="block text-sm font-medium mb-3 text-gray-600">{t("selectQuestion")}</label>
-                    <div className="grid gap-4">
-                      {isLoading ? (
-                        <div className="text-center py-4">{t("loading")}</div>
-                      ) : (
-                        questions.map((question) => (
-                          <Card
-                            key={question.id}
-                            className={`cursor-pointer transition-all ${
-                              selectedQuestion?.id === question.id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'hover:border-gray-300'
-                            }`}
-                            onClick={() => fetchSelectedQuestion(question.id)}
-                          >
-                            <CardContent className="p-4">
-                              <h3 className="font-medium">{question.title}</h3>
-                            </CardContent>
-                          </Card>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {selectedQuestion && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.3 }}
           >
             <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-xl font-medium text-gray-900">{t("problem")}</CardTitle>
+                <CardTitle className="text-xl font-medium text-gray-900">
+                  {t("problemType")}
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="prose max-w-none">
-                  <h3 className="text-lg font-medium mb-4">{selectedQuestion.title}</h3>
-                  <p className="whitespace-pre-wrap">{selectedQuestion.question}</p>
-                  {selectedQuestion.readingPassage && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                      <h4 className="font-medium mb-2">Reading Passage:</h4>
-                      <p className="whitespace-pre-wrap">{selectedQuestion.readingPassage}</p>
-                    </div>
-                  )}
-                  {selectedQuestion.listeningPassage && (
-                    <div className="mt-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowListeningPassage(!showListeningPassage)}
-                        className="mb-2"
-                      >
-                        {showListeningPassage ? t("hideListeningPassage") : t("showListeningPassage")}
-                      </Button>
-                      {showListeningPassage && (
-                        <div className="p-4 bg-gray-50 rounded-md">
-                          <h4 className="font-medium mb-2">Listening Passage:</h4>
-                          <p className="whitespace-pre-wrap">{selectedQuestion.listeningPassage}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {selectedQuestion?.listeningPassageUrl && (
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Listening Audio:</h4>
-                      <div className="w-full bg-white rounded-lg p-4 shadow-sm">
-                        {isAudioLoading ? (
-                          <div className="text-center py-4">{t("audioLoading")}</div>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-3 text-gray-600">
+                      {t("problemType")}
+                    </label>
+                    <Select
+                      value={selectedType}
+                      onValueChange={setSelectedType}
+                    >
+                      <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                        <SelectValue placeholder={t("problemType")} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-gray-200">
+                        {Object.entries(TEST_TYPES).map(([key, value]) => (
+                          <SelectItem
+                            key={key}
+                            value={key}
+                            className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
+                          >
+                            {value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedType && (
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-gray-600">
+                        {t("selectQuestion")}
+                      </label>
+                      <div className="grid gap-4">
+                        {isLoading ? (
+                          <div className="text-center py-4">{t("loading")}</div>
                         ) : (
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-4">
-                                <button
-                                  onClick={handlePlayPause}
-                                  className="p-2 rounded-full hover:bg-gray-100"
-                                >
-                                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-                                </button>
-                                <button
-                                  onClick={handleMute}
-                                  className="p-2 rounded-full hover:bg-gray-100"
-                                >
-                                  {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-                                </button>
-                                <button
-                                  onClick={handleLoop}
-                                  className={`p-2 rounded-full hover:bg-gray-100 ${isLooping ? 'text-blue-500' : ''}`}
-                                >
-                                  <Repeat size={24} />
-                                </button>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-500">{formatTime(currentTime)}</span>
-                                <input
-                                  type="range"
-                                  min={0}
-                                  max={duration || 0}
-                                  value={currentTime}
-                                  onChange={handleSeek}
-                                  className="w-64"
-                                />
-                                <span className="text-sm text-gray-500">{formatTime(duration)}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <VolumeX size={20} />
-                                <input
-                                  type="range"
-                                  min={0}
-                                  max={1}
-                                  step={0.1}
-                                  value={volume}
-                                  onChange={handleVolumeChange}
-                                  className="w-24"
-                                />
-                                <Volume2 size={20} />
-                              </div>
-                            </div>
-                          </div>
+                          questions.map((question) => (
+                            <Card
+                              key={question.id}
+                              className={`cursor-pointer transition-all ${
+                                selectedQuestion?.id === question.id
+                                  ? "border-blue-500 bg-blue-50"
+                                  : "hover:border-gray-300"
+                              }`}
+                              onClick={() => fetchSelectedQuestion(question.id)}
+                            >
+                              <CardContent className="p-4">
+                                <h3 className="font-medium">
+                                  {question.title}
+                                </h3>
+                              </CardContent>
+                            </Card>
+                          ))
                         )}
                       </div>
                     </div>
@@ -538,78 +481,223 @@ export default function TOEFLEssayPage() {
               </CardContent>
             </Card>
           </motion.div>
-        )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">{t("essayWriting")}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center gap-2">
-                    <Timer 
-                      isRunning={isTimerRunning} 
-                      onTick={setTimeElapsed}
-                      className="text-sm font-medium text-gray-600"
-                    />
-                    {selectedType && (
-                      <span className="text-sm font-medium text-gray-500">
-                        ({t("timeLimit")}: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}{t("minute")})
-                      </span>
+          {selectedQuestion && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-xl font-medium text-gray-900">
+                    {t("problem")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="prose max-w-none">
+                    <h3 className="text-lg font-medium mb-4">
+                      {selectedQuestion.title}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {selectedQuestion.question}
+                    </p>
+                    {selectedQuestion.readingPassage && (
+                      <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                        <h4 className="font-medium mb-2">Reading Passage:</h4>
+                        <p className="whitespace-pre-wrap">
+                          {selectedQuestion.readingPassage}
+                        </p>
+                      </div>
+                    )}
+                    {selectedQuestion.listeningPassage && (
+                      <div className="mt-4">
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            setShowListeningPassage(!showListeningPassage)
+                          }
+                          className="mb-2"
+                        >
+                          {showListeningPassage
+                            ? t("hideListeningPassage")
+                            : t("showListeningPassage")}
+                        </Button>
+                        {showListeningPassage && (
+                          <div className="p-4 bg-gray-50 rounded-md">
+                            <h4 className="font-medium mb-2">
+                              Listening Passage:
+                            </h4>
+                            <p className="whitespace-pre-wrap">
+                              {selectedQuestion.listeningPassage}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {selectedQuestion?.listeningPassageUrl && (
+                      <div className="mt-4">
+                        <h4 className="font-medium mb-2">Listening Audio:</h4>
+                        <div className="w-full bg-white rounded-lg p-4 shadow-sm">
+                          {isAudioLoading ? (
+                            <div className="text-center py-4">
+                              {t("audioLoading")}
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <button
+                                    onClick={handlePlayPause}
+                                    className="p-2 rounded-full hover:bg-gray-100"
+                                  >
+                                    {isPlaying ? (
+                                      <Pause size={24} />
+                                    ) : (
+                                      <Play size={24} />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={handleMute}
+                                    className="p-2 rounded-full hover:bg-gray-100"
+                                  >
+                                    {isMuted ? (
+                                      <VolumeX size={24} />
+                                    ) : (
+                                      <Volume2 size={24} />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={handleLoop}
+                                    className={`p-2 rounded-full hover:bg-gray-100 ${
+                                      isLooping ? "text-blue-500" : ""
+                                    }`}
+                                  >
+                                    <Repeat size={24} />
+                                  </button>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm text-gray-500">
+                                    {formatTime(currentTime)}
+                                  </span>
+                                  <input
+                                    type="range"
+                                    min={0}
+                                    max={duration || 0}
+                                    value={currentTime}
+                                    onChange={handleSeek}
+                                    className="w-64"
+                                  />
+                                  <span className="text-sm text-gray-500">
+                                    {formatTime(duration)}
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <VolumeX size={20} />
+                                  <input
+                                    type="range"
+                                    min={0}
+                                    max={1}
+                                    step={0.1}
+                                    value={volume}
+                                    onChange={handleVolumeChange}
+                                    className="w-24"
+                                  />
+                                  <Volume2 size={20} />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <span className="text-sm font-medium text-gray-600">
-                    {wordCount} / {wordLimit} {t("word")}
-                  </span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={applyTemplate}
-                  disabled={!selectedType}
-                  className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                >
-                  {t("applyTemplate")}
-                </Button>
-              </div>
-              <Textarea
-                placeholder={t("essayWritingPlaceholder")}
-                value={essay}
-                onChange={(e) => setEssay(e.target.value)}
-                className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
-                onFocus={startTimer}
-              />
-            </CardContent>
-          </Card>
-        </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex justify-end space-x-4"
-        >
-          <Button 
-            variant="outline"
-            onClick={() => router.push('/dashboard')}
-            className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
           >
-            {t("cancel")}
-          </Button>
-          <Button 
-            onClick={handleSubmit}
-            disabled={isSubmitting || !selectedType || !essay || !selectedQuestion}
-            className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+            <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader className="border-b border-gray-100">
+                <CardTitle className="text-xl font-medium text-gray-900">
+                  {t("essayWriting")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center gap-2">
+                      <Timer
+                        isRunning={isTimerRunning}
+                        onTick={setTimeElapsed}
+                        className="text-sm font-medium text-gray-600"
+                      />
+                      {selectedType && (
+                        <span className="text-sm font-medium text-gray-500">
+                          ({t("timeLimit")}:{" "}
+                          {
+                            TIME_LIMITS[
+                              selectedType as keyof typeof TIME_LIMITS
+                            ]
+                          }
+                          {t("minute")})
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium text-gray-600">
+                      {wordCount} / {wordLimit} {t("word")}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={applyTemplate}
+                    disabled={!selectedType}
+                    className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  >
+                    {t("applyTemplate")}
+                  </Button>
+                </div>
+                <Textarea
+                  placeholder={t("essayWritingPlaceholder")}
+                  value={essay}
+                  onChange={handleEssayChange}
+                  className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
+                  onFocus={startTimer}
+                />
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex justify-end space-x-4"
           >
-            {isSubmitting ? t("submitting") : t("submit")}
-          </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/dashboard")}
+              className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                isSubmitting || !selectedType || !essay || !selectedQuestion
+              }
+              className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+            >
+              {isSubmitting ? t("submitting") : t("submit")}
+            </Button>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </AuthGate>
   );
-} 
+}

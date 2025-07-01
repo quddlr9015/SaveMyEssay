@@ -4,8 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { useEffect, useState, useRef } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { getToken } from "@/utils/api";
-
+import { useAuth } from "@/components/AuthContext";
 export function NavigationBar() {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,16 +16,15 @@ export function NavigationBar() {
   const adminMenuRef = useRef<HTMLDivElement>(null);
   const essayDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
   const adminDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
-
+  const { accessToken } = useAuth();
   useEffect(() => {
     // 로컬 스토리지에서 토큰 확인
-    const token = getToken();
-    setIsLoggedIn(!!token);
+    setIsLoggedIn(!!accessToken);
 
-    if (token) {
+    if (accessToken) {
       try {
         // JWT 토큰 디코딩
-        const base64Url = token.split('.')[1];
+        const base64Url = accessToken.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);

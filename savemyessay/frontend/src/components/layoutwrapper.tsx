@@ -4,6 +4,7 @@
 import { usePathname } from '@/i18n/routing';
 import { NavigationBar } from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
+import { AuthProvider } from './AuthContext';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,10 +13,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const isHomePage = /^\/[a-z]{2}\/?$/.test(pathname);
 
   return (
-    <>
+    <AuthProvider>
       {!isHomePage && <NavigationBar />}
       <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
       <Footer />
-    </>
+    </AuthProvider>
   );
 }

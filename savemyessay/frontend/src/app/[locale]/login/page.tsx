@@ -3,34 +3,36 @@
 import { useRouter } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
-import { API_ENDPOINTS, getApiUrl, getToken, removeToken, isTokenValid } from "@/utils/api";
+import { API_ENDPOINTS, getApiUrl, isTokenValid } from "@/utils/api";
 import { useTranslations } from "next-intl";
+import { useAuth } from "@/components/AuthContext";
 
 export default function Login() {
   const t = useTranslations("LoginPage");
   const router = useRouter();
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(true);
+  const { accessToken, setAccessToken } = useAuth();
 
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const isValid = await isTokenValid();
+        const isValid = await isTokenValid(setAccessToken);
         
         if (isValid) {
           router.push('/dashboard');
         } else {
-          removeToken();
+          setAccessToken(null);
           setIsLoading(false);
         }
       } catch (error) {
-        removeToken();
+        setAccessToken(null);
         setIsLoading(false);
       }
     };
 
     checkSession();
-  }, [router]);
+  }, [router, accessToken]);
 
   if (isLoading) {
     return (

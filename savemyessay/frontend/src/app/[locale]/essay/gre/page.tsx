@@ -1,28 +1,39 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { useRouter } from '@/i18n/routing';
-import { API_ENDPOINTS, getApiUrl, getToken } from '@/utils/api';
-import { Timer } from '@/components/ui/timer';
-import { motion } from 'framer-motion';
-import { useLocale, useTranslations } from 'next-intl';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "@/i18n/routing";
+import { API_ENDPOINTS, getApiUrl } from "@/utils/api";
+import { Timer } from "@/components/ui/timer";
+import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
+import { AuthGate } from "@/components/AuthGate";
+import { useAuth } from "@/components/AuthContext";
+import { fetchApi } from "@/utils/api";
 
-const TEST_TYPES = ['ISSUE'];
+const TEST_TYPES = ["ISSUE"];
 const WORD_LIMITS = {
-  'ISSUE': 500,
+  ISSUE: 500,
 };
 
 const TIME_LIMITS = {
-  'ISSUE': 30, // 30분
+  ISSUE: 30, // 30분
 };
 
 const TEMPLATES = {
-  'ISSUE': 'The issue at hand is [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nThird, [Third point]\nIn conclusion, [Conclusion]',
-  'Argument': 'The argument presented states that [Argument].\n\nFirst, [First analysis]\nSecond, [Second analysis]\nThird, [Third analysis]\nIn conclusion, [Conclusion]'
+  ISSUE:
+    "The issue at hand is [Topic].\n\nFirst, [First point]\nSecond, [Second point]\nThird, [Third point]\nIn conclusion, [Conclusion]",
+  Argument:
+    "The argument presented states that [Argument].\n\nFirst, [First analysis]\nSecond, [Second analysis]\nThird, [Third analysis]\nIn conclusion, [Conclusion]",
 };
 
 interface Question {
@@ -39,8 +50,8 @@ interface Question {
 
 export default function GREEssayPage() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [essay, setEssay] = useState<string>('');
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [essay, setEssay] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -49,93 +60,88 @@ export default function GREEssayPage() {
   const locale = useLocale();
   const [isLoading, setIsLoading] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(
+    null
+  );
+  const { accessToken, setAccessToken } = useAuth();
 
-    // 문제 목록 가져오기
-    useEffect(() => {
-      const fetchQuestions = async () => {
-        if (!selectedType) return;
-        
-        setIsLoading(true);
-        try {
-          const token = getToken();
-          if (!token) {
-            router.push('/login');
-            return;
-          }
-  
-          const params = new URLSearchParams({
-            testType: 'GRE',
-            category: 'ESSAY',
-            questionType: selectedType
-          });
-  
-          const response = await fetch(
-            `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${token}`,
-              },
-              credentials: 'include',
-            }
-          );
-  
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            throw new Error(errorData?.message || t("questionListFailed"));
-          }
-  
-          const data = await response.json();
-          setQuestions(data);
-        } catch (error) {
-          alert(error instanceof Error ? error.message : '문제 목록을 가져오는 중 오류가 발생했습니다.');
-        } finally {
-          setIsLoading(false);
-        }
-      };
-  
-      fetchQuestions();
-    }, [selectedType, router]);
-  
-    // 선택된 문제 가져오기
-    const fetchSelectedQuestion = async (questionId: number) => {
+  // 문제 목록 가져오기
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      if (!selectedType) return;
+      
       setIsLoading(true);
       try {
-        const token = getToken();
+        const token = accessToken;
         if (!token) {
-          router.push('/login');
+          router.push("/login");
           return;
         }
-  
-        const response = await fetch(
-          `${getApiUrl()}${API_ENDPOINTS.ESSAY.QUESTIONS}?testType=GRE&testLevel=${selectedType}&id=${questionId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-            credentials: 'include',
-          }
+
+        const params = new URLSearchParams({
+          testType: "GRE",
+          category: "ESSAY",
+          questionType: selectedType,
+        });
+
+        const data = await fetchApi(
+          `${API_ENDPOINTS.ESSAY.QUESTION_LIST}?${params.toString()}`,
+          {},
+          token,
+          setAccessToken
         );
-  
-        if (!response.ok) {
-          throw new Error(t("questionFetchFailed"));
+
+        if (!data) {
+          throw new Error(t("questionListFailed"));
         }
-  
-        const data = await response.json();
-        setSelectedQuestion(data);
+        setQuestions(data);
       } catch (error) {
-        console.error('Error fetching question:', error);
-        alert(t("questionFetchError"));
+        alert(
+          error instanceof Error
+            ? error.message
+            : "문제 목록을 가져오는 중 오류가 발생했습니다."
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
+    fetchQuestions();
+  }, [selectedType, router, accessToken]);
+
+  // 선택된 문제 가져오기
+  const fetchSelectedQuestion = async (questionId: number) => {
+    setIsLoading(true);
+    try {
+      const token = accessToken;
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      const data = await fetchApi(
+        `${API_ENDPOINTS.ESSAY.QUESTIONS}?testType=GRE&testLevel=${selectedType}&id=${questionId}`,
+        {},
+        token,
+        setAccessToken
+      );
+      if (!data) {
+        throw new Error(t("questionFetchFailed"));
+      }
+      setSelectedQuestion(data);
+    } catch (error) {
+      console.error("Error fetching question:", error);
+      alert(t("questionFetchError"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 자동 저장 기능
   useEffect(() => {
     const autoSave = () => {
       if (essay) {
-        localStorage.setItem('gre_draft_essay', essay);
+        localStorage.setItem("gre_draft_essay", essay);
       }
     };
 
@@ -145,7 +151,7 @@ export default function GREEssayPage() {
 
   // 초기 로드 시 저장된 초안 불러오기
   useEffect(() => {
-    const savedDraft = localStorage.getItem('gre_draft_essay');
+    const savedDraft = localStorage.getItem("gre_draft_essay");
     if (savedDraft) {
       setEssay(savedDraft);
     }
@@ -169,43 +175,54 @@ export default function GREEssayPage() {
 
     setIsSubmitting(true);
     try {
-      const token = getToken();
+      const token = accessToken;
       if (!token) {
         alert(t("loginRequired"));
-        router.push('/login');
+        router.push("/login");
         return;
       }
-      const response = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SUBMIT}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+      const result = await fetchApi(
+        API_ENDPOINTS.ESSAY.SUBMIT,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            testName: "GRE",
+            testLevel: selectedType,
+            essayContents: essay,
+            question: selectedQuestion.question,
+            lang: locale,
+            timeSpent: timeElapsed,
+            range: 6,
+            increment: 0.5,
+            description: null,
+            passage: selectedQuestion.readingPassage,
+            listening: null,
+          }),
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          testName: 'GRE',
-          testLevel: selectedType,
-          essayContents: essay,
-          question: selectedQuestion.question,
-          lang: locale,
-          timeSpent: timeElapsed,
-          range: 6,
-          increment: 0.5,
-          description: null,
-          passage: selectedQuestion.readingPassage,
-          listening: null
-        }),
-      });
+        token,
+        setAccessToken
+      );
 
-      if (!response.ok) {
+      if (!result) {
         throw new Error(t("submitFailed"));
       }
-
-      const result = await response.json();
-      localStorage.removeItem('gre_draft_essay');
-      router.push(`/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(result.feedback)}&details=${encodeURIComponent(JSON.stringify(result.details))}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(selectedQuestion.question)}&examType=GRE&deleLevel=${selectedType}`);
+      localStorage.removeItem("gre_draft_essay");
+      router.push(
+        `/essay/feedback?score=${result.score}&feedback=${encodeURIComponent(
+          result.feedback
+        )}&details=${encodeURIComponent(
+          JSON.stringify(result.details)
+        )}&essay=${encodeURIComponent(essay)}&question=${encodeURIComponent(
+          selectedQuestion.question
+        )}&examType=GRE&deleLevel=${selectedType}`
+      );
     } catch (error) {
-      console.error('Error submitting essay:', error);
+      console.error("Error submitting essay:", error);
       alert(t("submitError"));
     } finally {
       setIsSubmitting(false);
@@ -222,88 +239,144 @@ export default function GREEssayPage() {
     }
   };
 
-  const wordLimit = selectedType ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS] : 0;
+  const handleEssayChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const newWordCount = value.split(/\s+/).filter(Boolean).length; 
+    if (newWordCount <= wordLimit) {
+      setEssay(value);
+    }
+  };
+
+
+  const wordLimit = selectedType
+    ? WORD_LIMITS[selectedType as keyof typeof WORD_LIMITS]
+    : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="container mx-auto space-y-8 max-w-4xl"
-      >
-        <motion.h1 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
-        >
-          GRE Essay Writing
-        </motion.h1>
-        
+    <AuthGate>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="container mx-auto space-y-8 max-w-4xl"
         >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">{t("problemType")}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-            <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-3 text-gray-600">{t("problemType")}</label>
-                  <Select value={selectedType} onValueChange={setSelectedType}>
-                    <SelectTrigger className="bg-white border-gray-200 text-gray-900">
-                      <SelectValue placeholder={t("problemType")} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200">
-                      {TEST_TYPES.map((type) => (
-                        <SelectItem 
-                          key={type} 
-                          value={type}
-                          className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
-                        >
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-5xl font-bold text-center mb-12 text-gray-900 tracking-tight"
+          >
+            GRE Essay Writing
+          </motion.h1>
 
-              {selectedType && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader className="border-b border-gray-100">
+                <CardTitle className="text-xl font-medium text-gray-900">
+                  {t("problemType")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium mb-3 text-gray-600">{t("selectQuestion")}</label>
-                    <div className="grid gap-4">
-                      {isLoading ? (
-                        <div className="text-center py-4">{t("loading")}</div>
-                      ) : (
-                        questions.map((question) => (
-                          <Card
-                            key={question.id}
-                            className={`cursor-pointer transition-all ${
-                              selectedQuestion?.id === question.id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'hover:border-gray-300'
-                            }`}
-                            onClick={() => fetchSelectedQuestion(question.id)}
+                    <label className="block text-sm font-medium mb-3 text-gray-600">
+                      {t("problemType")}
+                    </label>
+                    <Select
+                      value={selectedType}
+                      onValueChange={setSelectedType}
+                    >
+                      <SelectTrigger className="bg-white border-gray-200 text-gray-900">
+                        <SelectValue placeholder={t("problemType")} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-gray-200">
+                        {TEST_TYPES.map((type) => (
+                          <SelectItem
+                            key={type}
+                            value={type}
+                            className="text-gray-900 hover:bg-gray-50 focus:bg-gray-50"
                           >
-                            <CardContent className="p-4">
-                              <h3 className="font-medium">{question.title}</h3>
-                            </CardContent>
-                          </Card>
-                        ))
-                      )}
-                    </div>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
 
-        {selectedQuestion && (
+                  {selectedType && (
+                    <div>
+                      <label className="block text-sm font-medium mb-3 text-gray-600">
+                        {t("selectQuestion")}
+                      </label>
+                      <div className="grid gap-4">
+                        {isLoading ? (
+                          <div className="text-center py-4">{t("loading")}</div>
+                        ) : (
+                          questions.map((question) => (
+                            <Card
+                              key={question.id}
+                              className={`cursor-pointer transition-all ${
+                                selectedQuestion?.id === question.id
+                                  ? "border-blue-500 bg-blue-50"
+                                  : "hover:border-gray-300"
+                              }`}
+                              onClick={() => fetchSelectedQuestion(question.id)}
+                            >
+                              <CardContent className="p-4">
+                                <h3 className="font-medium">
+                                  {question.title}
+                                </h3>
+                              </CardContent>
+                            </Card>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {selectedQuestion && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-xl font-medium text-gray-900">
+                    {t("problem")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="prose max-w-none">
+                    <h3 className="text-lg font-medium mb-4">
+                      {selectedQuestion.title}
+                    </h3>
+                    <p className="whitespace-pre-wrap">
+                      {selectedQuestion.question}
+                    </p>
+                    {selectedQuestion.readingPassage && (
+                      <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                        <h4 className="font-medium mb-2">Reading Passage:</h4>
+                        <p className="whitespace-pre-wrap">
+                          {selectedQuestion.readingPassage}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -311,94 +384,80 @@ export default function GREEssayPage() {
           >
             <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader className="border-b border-gray-100">
-                <CardTitle className="text-xl font-medium text-gray-900">{t("problem")}</CardTitle>
+                <CardTitle className="text-xl font-medium text-gray-900">
+                  {t("essayWriting")}
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="prose max-w-none">
-                  <h3 className="text-lg font-medium mb-4">{selectedQuestion.title}</h3>
-                  <p className="whitespace-pre-wrap">{selectedQuestion.question}</p>
-                  {selectedQuestion.readingPassage && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                      <h4 className="font-medium mb-2">Reading Passage:</h4>
-                      <p className="whitespace-pre-wrap">{selectedQuestion.readingPassage}</p>
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center gap-2">
+                      <Timer
+                        isRunning={isTimerRunning}
+                        onTick={setTimeElapsed}
+                        className="text-sm font-medium text-gray-600"
+                      />
+                      {selectedType && (
+                        <span className="text-sm font-medium text-gray-500">
+                          ({t("timeLimit")}:{" "}
+                          {
+                            TIME_LIMITS[
+                              selectedType as keyof typeof TIME_LIMITS
+                            ]
+                          }
+                          {t("minute")})
+                        </span>
+                      )}
                     </div>
-                  )}
+                    <span className="text-sm font-medium text-gray-600">
+                      {wordCount} / {wordLimit} {t("word")}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={applyTemplate}
+                    disabled={!selectedType}
+                    className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  >
+                    {t("applyTemplate")}
+                  </Button>
                 </div>
+                <Textarea
+                  placeholder={t("essayWritingPlaceholder")}
+                  value={essay}
+                  onChange={handleEssayChange}
+                  className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
+                  onFocus={startTimer}
+                />
               </CardContent>
             </Card>
           </motion.div>
-        )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="bg-white border border-gray-100 shadow-lg hover:shadow-xl transition-shadow">
-            <CardHeader className="border-b border-gray-100">
-              <CardTitle className="text-xl font-medium text-gray-900">{t("essayWriting")}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center space-x-6">
-                  <div className="flex items-center gap-2">
-                    <Timer 
-                      isRunning={isTimerRunning} 
-                      onTick={setTimeElapsed}
-                      className="text-sm font-medium text-gray-600"
-                    />
-                    {selectedType && (
-                      <span className="text-sm font-medium text-gray-500">
-                        ({t("timeLimit")}: {TIME_LIMITS[selectedType as keyof typeof TIME_LIMITS]}{t("minute")})
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-sm font-medium text-gray-600">
-                    {wordCount} / {wordLimit} {t("word")}
-                  </span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  onClick={applyTemplate}
-                  disabled={!selectedType}
-                  className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                >
-                  {t("applyTemplate")}
-                </Button>
-              </div>
-              <Textarea
-                placeholder={t("essayWritingPlaceholder")}
-                value={essay}
-                onChange={(e) => setEssay(e.target.value)}
-                className="min-h-[400px] resize-none bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-all duration-200"
-                onFocus={startTimer}
-              />
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="flex justify-end space-x-4"
-        >
-          <Button 
-            variant="outline"
-            onClick={() => router.push('/dashboard')}
-            className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex justify-end space-x-4"
           >
-            {t("cancel")}
-          </Button>
-          <Button 
-            onClick={handleSubmit}
-            disabled={isSubmitting || !selectedType || !essay || !selectedQuestion}
-            className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-          >
-            {isSubmitting ? t("submitting") : t("submit")}
-          </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/dashboard")}
+              className="border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={
+                isSubmitting || !selectedType || !essay || !selectedQuestion
+              }
+              className="bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+            >
+              {isSubmitting ? t("submitting") : t("submit")}
+            </Button>
+          </motion.div>
         </motion.div>
-      </motion.div>
-    </div>
+      </div>
+    </AuthGate>
   );
-} 
+}

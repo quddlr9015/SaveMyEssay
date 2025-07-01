@@ -41,7 +41,6 @@ export const isTokenValid = async (setAccessToken: (token: string | null) => voi
 export const fetchApi = async (endpoint: string, options: RequestInit = {}, accessToken: string | null, setAccessToken: (token: string | null) => void) => {
     const baseUrl = getApiUrl();
     const url = `${baseUrl}${endpoint}`;
-    console.log('endpoint', endpoint);
     const makeRequest = async (token: string | null) => {
         return await fetch(url, {
             ...options,

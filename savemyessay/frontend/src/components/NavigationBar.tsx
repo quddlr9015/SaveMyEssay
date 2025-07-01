@@ -7,7 +7,6 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { useAuth } from "@/components/AuthContext";
 export function NavigationBar() {
   const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const t = useTranslations("NavigationBar");
   const [essayDropdownOpen, setEssayDropdownOpen] = useState(false);
@@ -18,9 +17,6 @@ export function NavigationBar() {
   const adminDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
   const { accessToken } = useAuth();
   useEffect(() => {
-    // 로컬 스토리지에서 토큰 확인
-    setIsLoggedIn(!!accessToken);
-
     if (accessToken) {
       try {
         // JWT 토큰 디코딩

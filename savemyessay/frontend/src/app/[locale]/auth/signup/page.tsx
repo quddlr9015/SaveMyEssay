@@ -6,6 +6,7 @@ import { API_ENDPOINTS, getApiUrl } from "@/utils/api";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from "next-intl";
+import { useAuth } from "@/components/AuthContext";
 
 interface TermSection {
   id: string;
@@ -51,7 +52,7 @@ function SignUpForm() {
   const [selectedTest, setSelectedTest] = useState<string>('');
   const [targetScore, setTargetScore] = useState<string>('');
   const [showScoreInput, setShowScoreInput] = useState(false);
-
+  const { setAccessToken } = useAuth();
   const terms: TermSection[] = [
     {
       id: 'all',
@@ -153,7 +154,7 @@ function SignUpForm() {
         const data = await response.json();
         // 토큰 저장
         if (data.accessToken) {
-          localStorage.setItem('token', data.accessToken);
+          setAccessToken(data.accessToken);
 
           if (selectedTest && targetScore) {
             const scoreResponse = await fetch(`${getApiUrl()}${API_ENDPOINTS.ESSAY.SET_TARGET_SCORE}`, {

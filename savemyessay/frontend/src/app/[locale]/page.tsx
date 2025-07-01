@@ -4,36 +4,43 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useEffect, useState } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { removeToken, isTokenValid } from "@/utils/api";
+import { useAuth } from "@/components/AuthContext";
+import { isTokenValid } from "@/utils/api";
 
 export default function Home() {
   const router = useRouter();
   const t = useTranslations("HomePage");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { accessToken, setAccessToken } = useAuth();
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       try {
-        // 토큰 유효성 검사
-        const isValid = await isTokenValid();
+        // 토큰 유효성 검사 
+        const isValid = await isTokenValid(setAccessToken);
         
         if (isValid) {
           // 토큰이 유효하면 대시보드로 리다이렉트
           router.push("/dashboard");
         } else {
           // 토큰이 유효하지 않으면 제거
-          removeToken();
+          setAccessToken(null);
           setIsCheckingAuth(false);
         }
       } catch (error) {
         // 에러 발생 시 토큰 제거
-        removeToken();
+        setAccessToken(null);
         setIsCheckingAuth(false);
       }
     };
 
     checkAuthAndRedirect();
-  }, [router]);
+    // if (accessToken) {
+    //   router.push("/dashboard");
+    // } else {
+    //   setIsCheckingAuth(false);
+    // }
+  }, [router, accessToken]);
 
   const handleLogoClick = () => {
     router.push("/dashboard");

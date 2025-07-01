@@ -1,17 +1,39 @@
-'use client';
+"use client";
 
-import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
-import { getApiUrl, getToken, setToken } from '@/utils/api';
-import { useTranslations } from 'next-intl';
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { Search, Filter, ArrowUpDown } from "lucide-react";
+import { fetchApi } from "@/utils/api";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
+import { AuthGate } from "@/components/AuthGate";
+import { useAuth } from "@/components/AuthContext";
 
 interface EssayHistory {
   id: number;
@@ -51,105 +73,81 @@ interface TargetScore {
 }
 
 const TEST_MAX_SCORES: { [key: string]: number } = {
-  'TOEFL - ACADEMIC DISCUSSION': 15,
-  'TOEFL - INTEGRATED': 15,
-  'TOEIC - PICTURE': 200,
-  'TOEIC - WRITTEN REQUEST': 200,
-  'TOEIC - OPINION': 200,
-  'GRE - ISSUE': 6,
-  'DELE': 25,
-  'IELTS': 9,
-  'TOEFL': 15,
-  'TOEIC': 200,
-  'GRE': 6,
+  "TOEFL - ACADEMIC DISCUSSION": 15,
+  "TOEFL - INTEGRATED": 15,
+  "TOEIC - PICTURE": 200,
+  "TOEIC - WRITTEN REQUEST": 200,
+  "TOEIC - OPINION": 200,
+  "GRE - ISSUE": 6,
+  DELE: 25,
+  IELTS: 9,
+  TOEFL: 15,
+  TOEIC: 200,
+  GRE: 6,
 };
 
 function DashboardContent() {
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const [histories, setHistories] = useState<EssayHistory[]>([]);
-  const [filteredHistories, setFilteredHistories] = useState<EssayHistory[]>([]);
+  const [filteredHistories, setFilteredHistories] = useState<EssayHistory[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('date');
-  const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedTest, setSelectedTest] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [selectedTest, setSelectedTest] = useState<string>("");
   const [statistics, setStatistics] = useState<Statistics>({});
   const [targetScore, setTargetScore] = useState<TargetScore | null>(null);
   const t = useTranslations("DashboardPage");
+  const { accessToken, setAccessToken } = useAuth();
 
   useEffect(() => {
-    // URL에서 토큰 가져오기
-    const token = searchParams.get('token');
-    if (token) {
-      setToken(token);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
+    if (!accessToken) return;
     const fetchHistories = async () => {
       try {
-        const token = getToken();
-        
-        const response = await fetch(`${getApiUrl()}/essay_grader/history`, {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (!response.ok) {
-          console.error('API response not ok:', response.status);
-          throw new Error(`API error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
+        const data = await fetchApi("/essay_grader/history", {}, accessToken, setAccessToken);
+
         // 데이터가 배열인지 확인
         if (!Array.isArray(data)) {
-          console.error('Expected array but got:', typeof data);
+          console.error("Expected array but got:", typeof data);
           setHistories([]);
           setFilteredHistories([]);
           return;
         }
         setHistories(data);
         setFilteredHistories(data);
-        
+
         // 통계 계산
         const stats = calculateStatistics(data);
         setStatistics(stats);
 
         // 목표 점수가 없는 경우에만 가장 최근 에세이의 시험을 기본값으로 설정
-        if (!targetScore?.testType && data.length > 0) {
-          const latestEssay = data.sort((a: EssayHistory, b: EssayHistory) => 
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )[0];
-          setSelectedTest(`${latestEssay.testName} - ${latestEssay.testLevel}`);
-        }
+        // if (!targetScore?.testType && data.length > 0) {
+        //   const latestEssay = data.sort(
+        //     (a: EssayHistory, b: EssayHistory) =>
+        //       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        //   )[0];
+        //   setSelectedTest(`${latestEssay.testName} - ${latestEssay.testLevel}`);
+        // }
       } catch (error) {
-        console.error('Error fetching essay histories:', error);
+        console.error("Error fetching essay histories:", error);
         setHistories([]);
         setFilteredHistories([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchHistories();
-  }, [targetScore?.testType]); // targetScore.testType이 변경될 때마다 실행
+  }, [accessToken]); // targetScore.testType이 변경될 때마다 실행 (지금은 필요없어보임)
 
   useEffect(() => {
+    if (!accessToken) return;
     const fetchTargetScore = async () => {
       try {
-        const token = getToken();
-        const response = await fetch(`${getApiUrl()}/essay_grader/target-score`, {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
+        const data = await fetchApi("/essay_grader/target-score", {}, accessToken, setAccessToken);
+
+        if (data) {
           setTargetScore(data);
           // 목표 점수가 있으면 해당 시험을 기본값으로 설정
           if (data.testType) {
@@ -158,12 +156,13 @@ function DashboardContent() {
           }
         }
       } catch (error) {
-        console.error('Error fetching target score:', error);
+        router.push('/login');
+        console.error("Error fetching target score:", error);
       }
     };
 
     fetchTargetScore();
-  }, []);
+  }, [accessToken]);
 
   const calculateStatistics = (data: EssayHistory[]): Statistics => {
     const testGroups = data.reduce((acc, curr) => {
@@ -176,26 +175,32 @@ function DashboardContent() {
     }, {} as { [key: string]: EssayHistory[] });
 
     const stats: Statistics = {};
-    
+
     Object.entries(testGroups).forEach(([testName, essays]) => {
       const totalEssays = essays.length;
-      const averageScore = essays.reduce((acc, curr) => acc + curr.score, 0) / totalEssays;
-      const lastEssayDate = new Date(Math.max(...essays.map(h => new Date(h.createdAt).getTime()))).toLocaleDateString();
-      
+      const averageScore =
+        essays.reduce((acc, curr) => acc + curr.score, 0) / totalEssays;
+      const lastEssayDate = new Date(
+        Math.max(...essays.map((h) => new Date(h.createdAt).getTime()))
+      ).toLocaleDateString();
+
       // 일자별 점수 추이 계산
       const scoreTrend = essays
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        .map(essay => ({
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        )
+        .map((essay) => ({
           date: new Date(essay.createdAt).toLocaleDateString(),
           score: essay.score,
-          testName: essay.testName
+          testName: essay.testName,
         }));
 
       stats[testName] = {
         totalEssays,
         averageScore,
         lastEssayDate,
-        scoreTrend
+        scoreTrend,
       };
     });
 
@@ -204,31 +209,35 @@ function DashboardContent() {
 
   useEffect(() => {
     let filtered = [...histories];
-    
+
     // 검색어 필터링
     if (searchTerm) {
-      filtered = filtered.filter(history => 
-        history.testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        history.testLevel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        history.question.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (history) =>
+          history.testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          history.testLevel.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          history.question.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // 시험 종류 필터링
     if (selectedTest) {
-      const testName = selectedTest.split(' - ')[0];
-      const testLevel = selectedTest.split(' - ')[1];
-      filtered = filtered.filter(history => history.testName === testName && history.testLevel === testLevel);
+      const testName = selectedTest.split(" - ")[0];
+      const testLevel = selectedTest.split(" - ")[1];
+      filtered = filtered.filter(
+        (history) =>
+          history.testName === testName && history.testLevel === testLevel
+      );
     }
 
     // 정렬
     filtered.sort((a, b) => {
-      if (sortBy === 'date') {
-        return sortOrder === 'desc' 
+      if (sortBy === "date") {
+        return sortOrder === "desc"
           ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      } else if (sortBy === 'score') {
-        return sortOrder === 'desc' ? b.score - a.score : a.score - b.score;
+      } else if (sortBy === "score") {
+        return sortOrder === "desc" ? b.score - a.score : a.score - b.score;
       }
       return 0;
     });
@@ -244,33 +253,42 @@ function DashboardContent() {
     );
   }
 
-  const currentStats = selectedTest === 'all' 
-    ? Object.values(statistics).reduce((acc, curr) => ({
-        totalEssays: acc.totalEssays + curr.totalEssays,
-        averageScore: (acc.averageScore * acc.totalEssays + curr.averageScore * curr.totalEssays) / (acc.totalEssays + curr.totalEssays),
-        lastEssayDate: new Date(Math.max(
-          new Date(acc.lastEssayDate).getTime(),
-          new Date(curr.lastEssayDate).getTime()
-        )).toLocaleDateString(),
-        scoreTrend: acc.scoreTrend.concat(curr.scoreTrend)
-      }), {
-        totalEssays: 0,
-        averageScore: 0,
-        lastEssayDate: '',
-        scoreTrend: []
-      })
-    : statistics[selectedTest] || {
-        totalEssays: 0,
-        averageScore: 0,
-        lastEssayDate: '',
-        scoreTrend: []
-      };
+  const currentStats =
+    selectedTest === "all"
+      ? Object.values(statistics).reduce(
+          (acc, curr) => ({
+            totalEssays: acc.totalEssays + curr.totalEssays,
+            averageScore:
+              (acc.averageScore * acc.totalEssays +
+                curr.averageScore * curr.totalEssays) /
+              (acc.totalEssays + curr.totalEssays),
+            lastEssayDate: new Date(
+              Math.max(
+                new Date(acc.lastEssayDate).getTime(),
+                new Date(curr.lastEssayDate).getTime()
+              )
+            ).toLocaleDateString(),
+            scoreTrend: acc.scoreTrend.concat(curr.scoreTrend),
+          }),
+          {
+            totalEssays: 0,
+            averageScore: 0,
+            lastEssayDate: "",
+            scoreTrend: [],
+          }
+        )
+      : statistics[selectedTest] || {
+          totalEssays: 0,
+          averageScore: 0,
+          lastEssayDate: "",
+          scoreTrend: [],
+        };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6 space-y-6">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">SaveMyEssay</h1>
-        
+
         {/* 목표 점수 카드 */}
         {targetScore && targetScore.testType && (
           <Card className="mb-6 bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
@@ -281,11 +299,15 @@ function DashboardContent() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-500">{t("testType")}</p>
-                  <p className="text-xl font-semibold text-indigo-600">{targetScore.testType}</p>
+                  <p className="text-xl font-semibold text-indigo-600">
+                    {targetScore.testType}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">{t("targetScore")}</p>
-                  <p className="text-xl font-semibold text-indigo-600">{targetScore.targetScore}</p>
+                  <p className="text-xl font-semibold text-indigo-600">
+                    {targetScore.targetScore}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -300,7 +322,9 @@ function DashboardContent() {
             </SelectTrigger>
             <SelectContent>
               {Object.keys(statistics).map((testName) => (
-                <SelectItem key={testName} value={testName}>{testName}</SelectItem>
+                <SelectItem key={testName} value={testName}>
+                  {testName}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -310,80 +334,105 @@ function DashboardContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="text-gray-900">{t("totalEssays")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-indigo-600">{statistics[selectedTest]?.totalEssays || 0}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader>
-              <CardTitle className="text-gray-900">{t("averageScore")}</CardTitle>
+              <CardTitle className="text-gray-900">
+                {t("totalEssays")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-indigo-600">
-                {statistics[selectedTest]?.averageScore ? statistics[selectedTest].averageScore.toFixed(1) : '0'}
+                {statistics[selectedTest]?.totalEssays || 0}
               </p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
             <CardHeader>
-              <CardTitle className="text-gray-900">{t("lastEssayDate")}</CardTitle>
+              <CardTitle className="text-gray-900">
+                {t("averageScore")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-indigo-600">{statistics[selectedTest]?.lastEssayDate || '-'}</p>
+              <p className="text-3xl font-bold text-indigo-600">
+                {statistics[selectedTest]?.averageScore
+                  ? statistics[selectedTest].averageScore.toFixed(1)
+                  : "0"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader>
+              <CardTitle className="text-gray-900">
+                {t("lastEssayDate")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-indigo-600">
+                {statistics[selectedTest]?.lastEssayDate || "-"}
+              </p>
             </CardContent>
           </Card>
         </div>
 
         {/* 점수 추이 차트 */}
-        {statistics[selectedTest]?.scoreTrend && statistics[selectedTest].scoreTrend.length > 0 && (
-          <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300 mb-6">
-            <CardHeader>
-              <CardTitle className="text-gray-900">{t("scoreTrend")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={statistics[selectedTest].scoreTrend}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="date" 
-                      label={{ value: t("date"), position: 'insideBottom', offset: -4 }}
-                      stroke="#4b5563"
-                    />
-                    <YAxis 
-                      label={{ value: t("score"), angle: -90, position: 'insideLeft' }}
-                      domain={[0, TEST_MAX_SCORES[selectedTest] || 100]}
-                      stroke="#4b5563"
-                    />
-                    <Tooltip 
-                      formatter={(value: number, name: string) => [
-                        `${value}${t("dot")}`,
-                        name
-                      ]}
-                      contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        border: 'none',
-                        borderRadius: '0.5rem',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="score" 
-                      name={`${selectedTest} (${t("totalScore")}: ${TEST_MAX_SCORES[selectedTest]})`}
-                      stroke="#6366f1" 
-                      strokeWidth={2}
-                      dot={{ r: 4, fill: '#6366f1' }}
-                      activeDot={{ r: 6, fill: '#4f46e5' }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {statistics[selectedTest]?.scoreTrend &&
+          statistics[selectedTest].scoreTrend.length > 0 && (
+            <Card className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300 mb-6">
+              <CardHeader>
+                <CardTitle className="text-gray-900">
+                  {t("scoreTrend")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={statistics[selectedTest].scoreTrend}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="date"
+                        label={{
+                          value: t("date"),
+                          position: "insideBottom",
+                          offset: -4,
+                        }}
+                        stroke="#4b5563"
+                      />
+                      <YAxis
+                        label={{
+                          value: t("score"),
+                          angle: -90,
+                          position: "insideLeft",
+                        }}
+                        domain={[0, TEST_MAX_SCORES[selectedTest] || 100]}
+                        stroke="#4b5563"
+                      />
+                      <Tooltip
+                        formatter={(value: number, name: string) => [
+                          `${value}${t("dot")}`,
+                          name,
+                        ]}
+                        contentStyle={{
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          border: "none",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="score"
+                        name={`${selectedTest} (${t("totalScore")}: ${
+                          TEST_MAX_SCORES[selectedTest]
+                        })`}
+                        stroke="#6366f1"
+                        strokeWidth={2}
+                        dot={{ r: 4, fill: "#6366f1" }}
+                        activeDot={{ r: 6, fill: "#4f46e5" }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
         {/* 검색 및 필터 */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -393,7 +442,9 @@ function DashboardContent() {
               <Input
                 placeholder={t("searchPlaceholder")}
                 value={searchTerm}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchTerm(e.target.value)
+                }
                 className="pl-10 bg-white/80 backdrop-blur-md border-none shadow-md"
               />
             </div>
@@ -411,7 +462,9 @@ function DashboardContent() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+              onClick={() =>
+                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+              }
               className="bg-white/80 backdrop-blur-md border-none shadow-md"
             >
               <ArrowUpDown className="h-4 w-4" />
@@ -422,7 +475,10 @@ function DashboardContent() {
         {/* 에세이 목록 */}
         <div className="space-y-4">
           {filteredHistories.map((history) => (
-            <Card key={history.id} className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card
+              key={history.id}
+              className="bg-white/80 backdrop-blur-md border-none shadow-lg hover:shadow-xl transition-all duration-300"
+            >
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <div className="space-y-1">
@@ -431,13 +487,18 @@ function DashboardContent() {
                         {history.testName} - {history.testLevel}
                       </h2>
                       <Badge
-                        variant={history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.8 
-                          ? "default" 
-                          : history.score >= (TEST_MAX_SCORES[history.testName] || 100) * 0.6 
-                            ? "secondary" 
-                            : "destructive"}
+                        variant={
+                          history.score >=
+                          (TEST_MAX_SCORES[history.testName] || 100) * 0.8
+                            ? "default"
+                            : history.score >=
+                              (TEST_MAX_SCORES[history.testName] || 100) * 0.6
+                            ? "secondary"
+                            : "destructive"
+                        }
                       >
-                        {history.score} {t("dot")} / {TEST_MAX_SCORES[history.testName]}
+                        {history.score} {t("dot")} /{" "}
+                        {TEST_MAX_SCORES[history.testName]}
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-500 line-clamp-1">
@@ -457,23 +518,37 @@ function DashboardContent() {
                     <AccordionContent>
                       <div className="space-y-6 pt-4">
                         <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">{t("question")}</h3>
-                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.question}</p>
-                        </div>
-                        
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">{t("essay")}</h3>
-                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.essay}</p>
+                          <h3 className="font-semibold text-gray-900 mb-2">
+                            {t("question")}
+                          </h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">
+                            {history.question}
+                          </p>
                         </div>
 
                         <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">{t("totalFeedback")}</h3>
-                          <p className="whitespace-pre-wrap text-sm text-gray-600">{history.feedback}</p>
+                          <h3 className="font-semibold text-gray-900 mb-2">
+                            {t("essay")}
+                          </h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">
+                            {history.essay}
+                          </p>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-2">
+                            {t("totalFeedback")}
+                          </h3>
+                          <p className="whitespace-pre-wrap text-sm text-gray-600">
+                            {history.feedback}
+                          </p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">{t("grammarFeedback")}</h3>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              {t("grammarFeedback")}
+                            </h3>
                             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
                               {history.grammar.map((item, index) => (
                                 <li key={index}>{item}</li>
@@ -481,7 +556,9 @@ function DashboardContent() {
                             </ul>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">{t("vocabularyFeedback")}</h3>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              {t("vocabularyFeedback")}
+                            </h3>
                             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
                               {history.vocabulary.map((item, index) => (
                                 <li key={index}>{item}</li>
@@ -489,7 +566,9 @@ function DashboardContent() {
                             </ul>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">{t("contentFeedback")}</h3>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              {t("contentFeedback")}
+                            </h3>
                             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
                               {history.content.map((item, index) => (
                                 <li key={index}>{item}</li>
@@ -497,7 +576,9 @@ function DashboardContent() {
                             </ul>
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900 mb-2">{t("organizationFeedback")}</h3>
+                            <h3 className="font-semibold text-gray-900 mb-2">
+                              {t("organizationFeedback")}
+                            </h3>
                             <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
                               {history.organization.map((item, index) => (
                                 <li key={index}>{item}</li>
@@ -521,7 +602,9 @@ function DashboardContent() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <DashboardContent />
+      <AuthGate>
+        <DashboardContent />
+      </AuthGate>
     </Suspense>
   );
-} 
+}

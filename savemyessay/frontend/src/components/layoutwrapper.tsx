@@ -5,6 +5,7 @@ import { usePathname } from '@/i18n/routing';
 import { NavigationBar } from '@/components/NavigationBar';
 import Footer from '@/components/Footer';
 import { AuthProvider } from './AuthContext';
+import { GAListener } from './GAListener';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       {!isHomePage && <NavigationBar />}
+      <GAListener />
       <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
       <Footer />
     </AuthProvider>

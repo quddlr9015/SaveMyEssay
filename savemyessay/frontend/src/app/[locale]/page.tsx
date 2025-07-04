@@ -35,11 +35,6 @@ export default function Home() {
     };
 
     checkAuthAndRedirect();
-    // if (accessToken) {
-    //   router.push("/dashboard");
-    // } else {
-    //   setIsCheckingAuth(false);
-    // }
   }, [router, accessToken]);
 
   const handleLogoClick = () => {
@@ -140,7 +135,7 @@ export default function Home() {
           </p>
           <div className="mt-8 flex justify-center md:justify-start animate-fade-in delay-200">
             <Link
-              href="/login"
+              href="/experience"
               className="inline-flex items-center px-8 py-3 border border-transparent text-lg font-bold rounded-full text-white bg-gradient-to-r from-indigo-500 to-pink-500 shadow-xl hover:scale-105 hover:from-pink-500 hover:to-indigo-500 transition-all duration-200"
             >
               {t("startButton")}

@@ -59,6 +59,52 @@ export function NavigationBar() {
     return null;
   }
 
+  // experience 경로에서는 로고와 Start 버튼만 보이게
+  if (/^\/[a-z]{2}\/experience/.test(pathname) || pathname.startsWith('/experience')) {
+    return (
+      <nav className="bg-white/90 shadow-md backdrop-blur-md sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex-shrink-0 flex items-center gap-2">
+              <span className="inline-block animate-bounce">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <circle cx="12" cy="12" r="10" fill="#6366F1" />
+                  <path
+                    d="M8 13h8M8 16h5"
+                    stroke="#fff"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </span>
+              <Link
+                href="/"
+                className="text-2xl font-extrabold text-gray-900 tracking-tight hover:text-indigo-600 transition-colors cursor-pointer"
+              >
+                SaveMyEssay
+              </Link>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/login"
+                className="inline-flex items-center px-5 py-2 border border-transparent text-base font-semibold rounded-full text-white bg-gradient-to-r from-indigo-500 to-pink-500 shadow-lg hover:scale-105 hover:from-pink-500 hover:to-indigo-500 transition-all duration-200"
+              >
+                {t("start")}
+              </Link>
+              <LanguageSelector />
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav className="bg-white/80 shadow-md backdrop-blur-md sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,7 +128,7 @@ export function NavigationBar() {
               </svg>
             </span>
             <Link
-              href="/dashboard"
+              href={accessToken ? "/dashboard" : "/"}
               className="text-2xl font-extrabold text-gray-900 tracking-tight hover:text-indigo-600 transition-colors cursor-pointer"
             >
               SaveMyEssay

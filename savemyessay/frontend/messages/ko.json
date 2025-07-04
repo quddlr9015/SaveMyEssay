@@ -2,7 +2,7 @@
     "HomePage": {
         "start": "시작하기",
         "decription": "AI가 당신의 에세이를 분석하고 평가합니다. 빠르고 정확한 피드백으로 글쓰기 능력을 향상시키세요.",
-        "startButton": "무료로 시작하기",
+        "startButton": "체험하기",
         "features": {
             "title": "주요 기능",
             "feature1": {
@@ -19,7 +19,7 @@
             }
         },
         "footer": {
-            "copyright": "© 2024 SaveMyEssay. All rights reserved."
+            "copyright": "© 2025 SaveMyEssay. All rights reserved."
         }
     },
     "SignInPage": {
@@ -122,7 +122,8 @@
         "dashboard": "대시보드",
         "Essay": "에세이",
         "profile": "프로필",
-        "description": "영어 Writing 시험 채점 서비스"
+        "description": "영어 Writing 시험 채점 서비스",
+        "start": "시작하기"
     },
     "EssayPage": {
         "testType": "어떤 시험을 준비하시나요?",
@@ -166,6 +167,7 @@
     "FeedbackPage": {
         "title": "채점 결과",
         "newEssay": "새로운 에세이 작성",
+        "tryAgain": "다시 체험하기",
         "testInfo": "시험 정보",
         "testType": "시험 유형",
         "question": "문제",
@@ -175,9 +177,19 @@
         "grammarFeedback": "문법 피드백",
         "vocabularyFeedback": "어휘 피드백",
         "contentFeedback": "내용 피드백",
-        "organizationFeedback": "구성 피드백"
+        "organizationFeedback": "구성 피드백",
+        "freeTryCtaTitle": "더 많은 기능을 사용하려면 회원가입 또는 로그인하세요!",
+        "freeTryCtaDesc1": "에세이 히스토리 저장 및 관리",
+        "freeTryCtaDesc2": "더 디테일한 AI 피드백",
+        "freeTryCtaDesc3": "개인화된 학습 보고서",
+        "freeTryCtaDesc4": "더 많은 문제 선택지",
+        "freeTryCtaButton": "회원가입 / 로그인"
     },
     "ContactPage": {
         "description": "문의가 있으신가요? 아래 이메일로 문의해주세요."
+    },
+    "ExperienceEssay": {
+        "title": "SaveMyEssay 체험하기",
+        "selectPrompt": "체험할 시험을 선택하세요"
     }
 } 

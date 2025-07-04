@@ -2,7 +2,7 @@
     "HomePage": {
       "start": "Start",
       "decription": "AI analyzes and evaluates your essay. Improve your writing skills with fast and accurate feedback.",
-      "startButton": "Start for free",
+      "startButton": "Try Now",
       "features": {
         "title": "Key Features",
         "feature1": {
@@ -19,7 +19,7 @@
         }
       },
       "footer": {
-        "copyright": "© 2024 SaveMyEssay. All rights reserved."
+        "copyright": "© 2025 SaveMyEssay. All rights reserved."
       }
     },
     "SignInPage": {
@@ -121,7 +121,8 @@
         "dashboard": "Dashboard",
         "Essay": "Essay",
         "profile": "Profile",
-        "description": "English Writing Test Grading Service"
+        "description": "English Writing Test Grading Service",
+        "start": "Start"
     },
     "EssayPage": {
         "testType": "What test are you preparing for?",
@@ -165,6 +166,7 @@
     "FeedbackPage": {
         "title": "Result",
         "newEssay": "New Essay",
+        "tryAgain": "Try Again",
         "testInfo": "Test Information",
         "testType": "Test Type",
         "question": "Question",
@@ -174,9 +176,19 @@
         "grammarFeedback": "Grammar Feedback",
         "vocabularyFeedback": "Vocabulary Feedback",
         "contentFeedback": "Content Feedback",
-        "organizationFeedback": "Organization Feedback"
+        "organizationFeedback": "Organization Feedback",
+        "freeTryCtaTitle": "Sign up or log in to use more features!",
+        "freeTryCtaDesc1": "Save and manage your essay history",
+        "freeTryCtaDesc2": "More detailed AI feedback",
+        "freeTryCtaDesc3": "Personalized learning reports",
+        "freeTryCtaDesc4": "More question selections",
+        "freeTryCtaButton": "Sign Up / Log In"
     },
     "ContactPage": {
         "description": "For any inquiries, please contact us at"
+    },
+    "ExperienceEssay": {
+      "title": "Try SaveMyEssay",
+      "selectPrompt": "Select a test type to try"
     }
 } 

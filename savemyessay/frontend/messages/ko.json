@@ -1,7 +1,7 @@
 {
     "HomePage": {
         "start": "시작하기",
-        "decription": "AI가 당신의 에세이를 분석하고 평가합니다. 빠르고 정확한 피드백으로 글쓰기 능력을 향상시키세요.",
+        "decription": "TOEFL, TOEIC, GRE 등 다양한 시험의 Writing 문제를 제공하며, 각 문제에 맞춰 에세이를 작성하면 AI가 예상 점수와 문법·논리·구성 전반에 대한 맞춤형 피드백을 제공합니다.",
         "startButton": "체험하기",
         "features": {
             "title": "주요 기능",

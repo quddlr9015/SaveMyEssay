@@ -5,17 +5,20 @@ import { Link, usePathname } from "@/i18n/routing";
 import { useEffect, useState, useRef } from "react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useAuth } from "@/components/AuthContext";
+
 export function NavigationBar() {
   const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const t = useTranslations("NavigationBar");
   const [essayDropdownOpen, setEssayDropdownOpen] = useState(false);
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const essayMenuRef = useRef<HTMLDivElement>(null);
   const adminMenuRef = useRef<HTMLDivElement>(null);
   const essayDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
   const adminDropdownTimeout = useRef<NodeJS.Timeout | null>(null);
   const { accessToken } = useAuth();
+
   useEffect(() => {
     if (accessToken) {
       try {
@@ -36,6 +39,11 @@ export function NavigationBar() {
       setIsAdmin(false);
     }
   }, []);
+
+  // Close mobile menu when pathname changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // 드롭다운 외부 클릭/마우스아웃 시 닫기 (딜레이 포함)
   const handleEssayMouseEnter = () => {
@@ -134,7 +142,9 @@ export function NavigationBar() {
               SaveMyEssay
             </Link>
           </div>
-          <div className="flex items-center space-x-4">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/dashboard"
               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -235,6 +245,161 @@ export function NavigationBar() {
             </Link>
             <LanguageSelector />
           </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center space-x-2">
+            <LanguageSelector />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Open main menu</span>
+              {/* Hamburger icon */}
+              <svg
+                className={`${mobileMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              {/* Close icon */}
+              <svg
+                className={`${mobileMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-200">
+          <Link
+            href="/dashboard"
+            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              pathname === "/dashboard"
+                ? "text-indigo-600 bg-indigo-50"
+                : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+            }`}
+          >
+            {t("dashboard")}
+          </Link>
+          
+          {/* Mobile Essay dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setEssayDropdownOpen(!essayDropdownOpen)}
+              className={`w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors focus:outline-none ${
+                pathname.startsWith("/essay")
+                  ? "text-indigo-600 bg-indigo-50"
+                  : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+              }`}
+            >
+              {t("Essay")}
+              <svg
+                className={`ml-2 inline-block h-4 w-4 transition-transform ${
+                  essayDropdownOpen ? 'rotate-180' : ''
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <div className={`${essayDropdownOpen ? 'block' : 'hidden'} pl-4 space-y-1`}>
+              <Link
+                href="/essay/toeic"
+                className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              >
+                TOEIC
+              </Link>
+              <Link
+                href="/essay/toefl"
+                className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              >
+                TOEFL
+              </Link>
+              <Link
+                href="/essay/gre"
+                className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+              >
+                GRE
+              </Link>
+            </div>
+          </div>
+
+          {/* Mobile Admin dropdown */}
+          {isAdmin && (
+            <div className="relative">
+              <button
+                onClick={() => setAdminDropdownOpen(!adminDropdownOpen)}
+                className={`w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors focus:outline-none ${
+                  pathname.startsWith("/admin")
+                    ? "text-indigo-600 bg-indigo-50"
+                    : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+                }`}
+              >
+                관리자
+                <svg
+                  className={`ml-2 inline-block h-4 w-4 transition-transform ${
+                    adminDropdownOpen ? 'rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className={`${adminDropdownOpen ? 'block' : 'hidden'} pl-4 space-y-1`}>
+                <Link
+                  href="/admin/questions"
+                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  문제 관리
+                </Link>
+                <Link
+                  href="/admin/users"
+                  className="block px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                >
+                  회원 관리
+                </Link>
+              </div>
+            </div>
+          )}
+
+          <Link
+            href="/profile"
+            className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              pathname === "/profile"
+                ? "text-indigo-600 bg-indigo-50"
+                : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+            }`}
+          >
+            {t("profile")}
+          </Link>
         </div>
       </div>
     </nav>

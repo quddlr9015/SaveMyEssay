@@ -65,14 +65,14 @@ function SignUpForm() {
       title: t("termSection.service.title"),
       content: (
         <div className="space-y-4">
-          <p>제1조 (목적)</p>
-          <p>본 약관은 SaveMyEssay(이하 &quot;회사&quot;)가 제공하는 서비스의 이용조건 및 절차, 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
-          <p>제2조 (용어의 정의)</p>
-          <p>본 약관에서 사용하는 용어의 정의는 다음과 같습니다:</p>
+          <p>{t("service.title1")}</p>
+          <p>{t("service.descript1")}</p>
+          <p>{t("service.title2")}</p>
+          <p>{t("service.descript2")}</p>
           <ul className="list-disc pl-6">
-            <li>&quot;서비스&quot;란 회사가 제공하는 모든 서비스를 의미합니다.</li>
-            <li>&quot;회원&quot;이란 회사와 서비스 이용계약을 체결한 자를 말합니다.</li>
-            <li>&quot;이용자&quot;란 회사의 서비스를 이용하는 회원을 말합니다.</li>
+            <li>{t("service.li1")}</li>
+            <li>{t("service.li2")}</li>
+            <li>{t("service.li3")}</li>
           </ul>
         </div>
       ),
@@ -83,16 +83,16 @@ function SignUpForm() {
       title: t("termSection.privacy.title"),
       content: (
         <div className="space-y-4">
-          <p>1. 수집하는 개인정보 항목</p>
+          <p>{t("privacy.title1")}</p>
           <ul className="list-disc pl-6">
-            <li>이메일 주소</li>
-            <li>이름</li>
+            <li>{t("privacy.email")}</li>
+            <li>{t("privacy.name")}</li>
           </ul>
-          <p>2. 개인정보의 수집 및 이용목적</p>
+          <p>{t("privacy.title2")}</p>
           <ul className="list-disc pl-6">
-            <li>회원 식별 및 가입의사 확인</li>
-            <li>서비스 제공 및 계약의 이행</li>
-            <li>회원 관리</li>
+            <li>{t("privacy.li1")}</li>
+            <li>{t("privacy.li2")}</li>
+            <li>{t("privacy.li3")}</li>
           </ul>
         </div>
       ),
@@ -103,11 +103,11 @@ function SignUpForm() {
       title: t("termSection.marketing.title"),
       content: (
         <div className="space-y-4">
-          <p>마케팅 정보 수신에 동의하시면 다음과 같은 혜택과 정보를 받으실 수 있습니다:</p>
+          <p>{t("marketing.title")}</p>
           <ul className="list-disc pl-6">
-            <li>신규 서비스 및 이벤트 안내</li>
-            <li>맞춤형 서비스 제공</li>
-            <li>서비스 이용에 대한 통계 분석</li>
+            <li>{t("marketing.li1")}</li>
+            <li>{t("marketing.li2")}</li>
+            <li>{t("marketing.li3")}</li>
           </ul>
         </div>
       ),

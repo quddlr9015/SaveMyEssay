@@ -67,7 +67,31 @@
         "targetScoreSaveFailed": "Failed to save target score.",
         "section": "Section",
         "score": "Score",
-        "targetScore": "Please enter your target score."
+        "targetScore": "Please enter your target score.",
+        "service": {
+          "title1": "Article 1 (Purpose)",
+          "descript1": "These Terms and Conditions aim to define the terms of use and procedures for services provided by SaveMyEssay (hereinafter referred to as the \"Company\"), as well as the rights, obligations, and responsibilities between the Company and its members.",
+          "title2": "Article 2 (Definitions)",
+          "descript2": "The definitions of terms used in these Terms and Conditions are as follows:",
+          "li1": "\"Service\" refers to all services provided by the Company.",
+          "li2": "\"Member\" refers to an individual who has entered into a service use agreement with the Company.",
+          "li3": "\"User\" refers to a member who uses the Company's services."
+      },
+      "privacy": {
+        "title1": "1. Personal Information Collected",
+        "email": "Email address",
+        "name": "Name",
+        "title2": "2. Purpose of Collection and Use of Personal Information",
+        "li1": "User identification and confirmation of registration intent",
+        "li2": "Provision of services and fulfillment of contracts",
+        "li3": "User management"
+      },
+      "marketing": {
+        "title": "If you agree to receive marketing information, you may receive the following benefits and updates:",
+        "li1": "Information on new services and events",
+        "li2": "Personalized service offerings",
+        "li3": "Statistical analysis of service usage"
+      }
     },
     "DashboardPage": {
         "goal": "Current Goal",

@@ -38,7 +38,7 @@ export function NavigationBar() {
     } else {
       setIsAdmin(false);
     }
-  }, []);
+  }, [accessToken]);
 
   // Close mobile menu when pathname changes
   useEffect(() => {
